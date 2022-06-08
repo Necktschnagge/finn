@@ -10,7 +10,7 @@
 
 namespace {
 	
-	const std::string STANDARD_LOGGER_NAME{ "finn-main" };
+	const std::string STANDARD_LOGGER_NAME{ "main" };
 
 }
 
