@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.13.4)
 
 
 ############### Names ###############
-set(PROJECT_NAME Finn)
+set(PROJECT_NAME ___template___project___name___)
 
 
 ############### Preprocessor Macros ###############
