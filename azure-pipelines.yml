@@ -45,8 +45,8 @@ strategy:
       imageName: 'windows-2019'
       the_name: 'Azure Pipelines'
     
-    raspberry_pi:
-      the_name: 'Default'
+#    raspberry_pi:
+#      the_name: 'Default'
 
 
 pool:
