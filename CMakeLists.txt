@@ -6,7 +6,7 @@ set(PROJECT_NAME ___template___project___name___)
 
 
 ############### Preprocessor Macros ###############
-add_compile_definitions(GIT_REPOSITORY_URL="https://github.com/Necktschnagge/finn")
+add_compile_definitions(GIT_REPOSITORY_URL="___template___project___url___")
 
 
 ############### Project Decklaration ###############
