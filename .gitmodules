@@ -4,3 +4,6 @@
 [submodule "extern/googletest"]
 	path = extern/googletest
 	url = https://github.com/google/googletest
+[submodule "extern/cpp-netlib"]
+	path = extern/cpp-netlib
+	url = https://github.com/cpp-netlib/cpp-netlib
