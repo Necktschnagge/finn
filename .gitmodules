@@ -4,3 +4,6 @@
 [submodule "extern/googletest"]
 	path = extern/googletest
 	url = https://github.com/google/googletest
+[submodule "extern/cpr"]
+	path = extern/cpr
+	url = https://github.com/libcpr/cpr
