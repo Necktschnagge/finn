@@ -54,6 +54,10 @@ set(CMAKE_CXX_FLAGS_DEBUG "/MTd /Zi /Ob0 /Od /RTC1")
 include_directories(SYSTEM extern/spdlog/include)
 add_subdirectory(extern/googletest)
 
+include(FetchContent)
+FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/libcpr/cpr.git
+                         GIT_TAG 21f42cf882d0b7e5ae9e3434574fc47e187728de) # The commit hash for 1.8.0. Replace with the latest from: https://github.com/libcpr/cpr/releases
+FetchContent_MakeAvailable(cpr)
 
 ############### Sources ###############
 add_subdirectory(src)
