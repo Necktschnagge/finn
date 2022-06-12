@@ -10,4 +10,6 @@ if(LINUX)
 	)
 endif()
 
+target_link_libraries(${PROJECT_NAME} PRIVATE cpr::cpr)
+
 add_library(${PROJECT_NAME}_lib STATIC ${SOURCES}) #for using in tests
