@@ -41,6 +41,11 @@ if (UNIX)
 	message("Running on UNIX.")
 endif()
 
+if(WIN32) # Install dlls in the same directory as the executable on Windows # at least some of them
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
+endif()
 
 ############### Language and Flags ###############
 set(CMAKE_CXX_STANDARD 17)
@@ -58,7 +63,7 @@ add_subdirectory(extern/googletest)
 
 include(FetchContent)
 FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/libcpr/cpr.git
-                         GIT_TAG 1.8.3) # The commit hash for 1.8.0. Replace with the latest from: https://github.com/libcpr/cpr/releases
+                         GIT_TAG 3baa80e66bbaba40f5aa0d9409d99d0727f80e1a) # The commit hash for master@2022-09-28  14::30. Replace with the latest from: https://github.com/libcpr/cpr/releases
 FetchContent_MakeAvailable(cpr)
 
 
