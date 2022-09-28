@@ -41,6 +41,11 @@ if (UNIX)
 	message("Running on UNIX.")
 endif()
 
+if(WIN32) # Install dlls in the same directory as the executable on Windows # at least some of them
+	set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
+	set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
+	set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${PROJECT_BINARY_DIR}")
+endif()
 
 ############### Language and Flags ###############
 set(CMAKE_CXX_STANDARD 17)
