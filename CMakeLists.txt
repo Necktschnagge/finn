@@ -63,7 +63,7 @@ add_subdirectory(extern/googletest)
 
 include(FetchContent)
 FetchContent_Declare(cpr GIT_REPOSITORY https://github.com/libcpr/cpr.git
-                         GIT_TAG 1.8.3) # The commit hash for 1.8.0. Replace with the latest from: https://github.com/libcpr/cpr/releases
+                         GIT_TAG 1.9.2) # The commit hash for 1.8.0. Replace with the latest from: https://github.com/libcpr/cpr/releases
 FetchContent_MakeAvailable(cpr)
 
 
