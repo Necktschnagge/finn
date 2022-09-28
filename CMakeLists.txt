@@ -53,12 +53,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_CXX_EXTENSIONS False)
 if (WIN32)
 	set(CMAKE_CXX_FLAGS_RELEASE "/MT /O2 /Ob2 /DNDEBUG")
-	set(CMAKE_CXX_FLAGS_DEBUG "/MTd /Zi /Ob0 /Od /RTC1")
+	set(CMAKE_CXX_FLAGS_DEBUG "/MT /Zi /Ob0 /Od /RTC1")
 endif()
 
 
 ############### Libraries ###############
 include_directories(SYSTEM extern/spdlog/include)
+include_directories(SYSTEM extern/json/include)
 add_subdirectory(extern/googletest)
 
 include(FetchContent)
