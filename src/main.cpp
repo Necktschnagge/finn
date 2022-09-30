@@ -7,6 +7,7 @@
 #include <iostream>
 #include <fstream>
 
+static const std::string secret_token = "XXXXXXXXXXXXX";
 
 
 nlohmann::json get_stock_symbols(const std::string& exchange) {
