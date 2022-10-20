@@ -7,15 +7,16 @@
 #include <iostream>
 #include <fstream>
 
-static const std::string secret_token = "XXXXXXXXXXXXX";
+static constexpr std::string_view secret_token{ "XXXXX" };
 
+static const std::string candles_Nvidia{ "candles_Nvidia" };
 
 nlohmann::json get_stock_symbols(const std::string& exchange) {
 	std::cout << "\nget all symbols...";
-	//https://finnhub.io/api/v1/stock/symbol?exchange=US&token=caeqfm2ad3i9ra0rgja0
+	//https://finnhub.io/api/v1/stock/symbol?exchange=US
 	cpr::Response r = cpr::Get(cpr::Url{ "https://finnhub.io/api/v1/stock/symbol" },
 		//cpr::Authentication{"user", "pass", cpr::AuthMode::BASIC},
-		cpr::Parameters{ {"exchange", exchange}, {"token", secret_token} });
+		cpr::Parameters{ {"exchange", exchange}, {"token", secret_token.data()} });
 	/*
 	std::cout << r.status_code << '\n'                // 200
 		<< r.header["content-type"] << '\n'       // application/json; charset=utf-8
@@ -24,15 +25,15 @@ nlohmann::json get_stock_symbols(const std::string& exchange) {
 
 	nlohmann::json stock_list = nlohmann::json::parse(r.text);
 
-	std::cout << "\ncheck list..." << stock_list.is_array();
-	std::cout << "\ncheck object..." << stock_list.is_object();
+	//std::cout << "\ncheck list..." << stock_list.is_array();
+	//std::cout << "\ncheck object..." << stock_list.is_object();
 
 	return stock_list;
 }
 
 
 nlohmann::json get_candles(const std::string& symbol) {
-	std::cout << "\nget all symbols...";
+	std::cout << "\nget all candles...";
 
 	//https://finnhub.io/api/v1/stock/candle?symbol=AAPL&resolution=1&from=1631022248&to=1631627048
 	cpr::Response r = cpr::Get(cpr::Url{ "https://finnhub.io/api/v1/stock/candle" },
@@ -42,27 +43,25 @@ nlohmann::json get_candles(const std::string& symbol) {
 		{"resolution", "1"},
 		{"from", "1656662061"},
 		{"to", "1664531661"},
-		{"token", secret_token}
+		{"token", secret_token.data()}
 		});
 
-	nlohmann::json stock_list = nlohmann::json::parse(r.text);
+	nlohmann::json candles = nlohmann::json::parse(r.text);
 
-	std::cout << "\ncheck list..." << stock_list.is_array();
-	std::cout << "\ncheck object..." << stock_list.is_object();
+	//std::cout << "\ncheck list..." << stock_list.is_array();
+	//std::cout << "\ncheck object..." << stock_list.is_object();
 
-	return stock_list;
+	return candles;
 }
 
 
 nlohmann::json get_share_details(const std::string& symbol) {
-
-
 	std::cout << "\nget details...";
 	//https://finnhub.io/api/v1/quote?symbol=AAPL
 
 	cpr::Response r = cpr::Get(cpr::Url{ "https://finnhub.io/api/v1/quote" },
 		//cpr::Authentication{"user", "pass", cpr::AuthMode::BASIC},
-		cpr::Parameters{ {"symbol", symbol}, {"token", secret_token} });
+		cpr::Parameters{ {"symbol", symbol}, {"token", secret_token.data()} });
 	/*
 	std::cout << r.status_code << '\n'                // 200
 		<< r.header["content-type"] << '\n'       // application/json; charset=utf-8
@@ -71,8 +70,8 @@ nlohmann::json get_share_details(const std::string& symbol) {
 
 	nlohmann::json details = nlohmann::json::parse(r.text);
 
-	std::cout << "\ncheck list..." << details.is_array();
-	std::cout << "\ncheck object..." << details.is_object();
+	//std::cout << "\ncheck list..." << details.is_array();
+	//std::cout << "\ncheck object..." << details.is_object();
 
 	return details;
 }
@@ -92,7 +91,7 @@ int main()
 	ofile.close();
 
 	// get all US stock symbols...
-	if (false) {
+	if (true) {
 		auto stock_list = get_stock_symbols("US");
 		const std::string key{ "stock_list_US" };
 
@@ -113,7 +112,7 @@ int main()
 	}
 
 	// get all DE stock symbols...
-	if (false) {
+	if (true) {
 		auto stock_list = get_stock_symbols("DE");
 		const std::string key{ "stock_list_DE" };
 
@@ -134,41 +133,18 @@ int main()
 
 	}
 
-	// get candles...
+	// get candles for NVDA...
 	if (true) {
-		auto stock_list = get_candles("NVDA");
-		const std::string key{ "candles_Nvidia" };
+		auto candle_chart_data = get_candles("NVDA");
 
-		summary[key] = stock_list;
-		if (false)
-			if (summary[key].is_array())
-				std::sort(
-					summary[key].begin(),
-					summary[key].end(),
-					[](const auto& a, const auto& b) {
-						try {
-							return a.at("symbol") < b.at("symbol");
-						}
-						catch (...) {
-							return false;
-						}
-					}
-		);
-
+		summary[candles_Nvidia] = candle_chart_data;
 	}
 
 	// get details of a single stock
 
-	if (false) {
+	if (true) {
 		summary["details_Nvidia"] = get_share_details("NVDA");
 		summary["details_Intel"] = get_share_details("INTC");
-	}
-
-	if (false) { // rename a key...
-		summary["stock_list_US"] = summary["stock_list"];
-		auto it = summary.find("stock_list");
-		auto jt = it;
-		summary.erase("stock_list");
 	}
 
 	//save json
@@ -179,4 +155,16 @@ int main()
 	return 0;
 
 }
+
+#if false
+//////////////// a bunch of trash:
+
+if (false) { // rename a key...
+	summary["stock_list_US"] = summary["stock_list"];
+	auto it = summary.find("stock_list");
+	auto jt = it;
+	summary.erase("stock_list");
+}
+
+#endif
 
