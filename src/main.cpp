@@ -82,13 +82,23 @@ int main()
 	init_logger();
 	const std::string json_file_name{ "summary.json" };
 
-	nlohmann::json summary;
+	nlohmann::json summary{ nlohmann::json::object() };
 	//load json
 	std::ifstream ofile;
 	ofile.open(json_file_name);
-	ofile >> std::noskipws;
-	summary = nlohmann::json::parse(std::istream_iterator<std::ifstream::char_type>(ofile), std::istream_iterator<std::ifstream::char_type>());
-	ofile.close();
+	if (ofile.good()) { // check if opened a file
+		ofile >> std::noskipws;
+		try {
+			summary = nlohmann::json::parse(std::istream_iterator<std::ifstream::char_type>(ofile), std::istream_iterator<std::ifstream::char_type>());
+		}
+		catch (...) {
+			std::cerr << "Could not parse opened file named:   " << json_file_name << std::endl;
+		}
+		ofile.close();
+	}
+	else {
+		std::cerr << "Could not open a file named:   " << json_file_name << std::endl;
+	}
 
 	// get all US stock symbols...
 	if (true) {
