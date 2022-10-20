@@ -1,13 +1,13 @@
 #include "logger.h"
 
+#include "secrets.h"
+
 #include <cpr/cpr.h>
 
 #include <nlohmann/json.hpp>
 
 #include <iostream>
 #include <fstream>
-
-static constexpr std::string_view secret_token{ "XXXXX" };
 
 static const std::string candles_Nvidia{ "candles_Nvidia" };
 
