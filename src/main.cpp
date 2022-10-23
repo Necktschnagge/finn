@@ -9,27 +9,42 @@
 #include <iostream>
 #include <fstream>
 
+class finnhub_rest_client final {
+private:
+	std::string api_key;
+public:
+	class response_json_error : public std::runtime_error {
+	public:
+		response_json_error(const std::string& error_message) : std::runtime_error(error_message) {}
+
+		virtual const char* what() const noexcept override {
+			return this->std::runtime_error::what();
+		}
+	};
+
+	finnhub_rest_client(const std::string& api_key) : api_key(api_key) {}
+
+	nlohmann::json getStockSymbols(const std::string& exchange = "US") {
+		finnhub_client_logger()->debug(std::string("Getting stock symbols...   [").append(exchange).append("]"));
+		const auto url{ cpr::Url{ "https://finnhub.io/api/v1/stock/symbol" } };
+		const auto params{ cpr::Parameters{ {"exchange", exchange}, {"token", api_key} } };
+		finnhub_client_logger()->trace(std::string("url:   ").append(url.c_str()));
+		cpr::Response r = cpr::Get(url, params);
+		finnhub_client_logger()->trace(std::string("response status code:   ").append(std::to_string(r.status_code)));
+		finnhub_client_logger()->trace(std::string("response content type:   ").append(r.header["content-type"]));
+		try {
+			nlohmann::json stock_list = nlohmann::json::parse(r.text);
+			return stock_list;
+		}
+		catch (...) {
+			finnhub_client_logger()->error("Could not parse an http response as json.");
+			finnhub_client_logger()->trace(r.text);
+			throw response_json_error(std::string("Could not parse response from ").append(url.c_str()));
+		}
+	}
+};
+
 static const std::string candles_Nvidia{ "candles_Nvidia" };
-
-nlohmann::json get_stock_symbols(const std::string& exchange) {
-	std::cout << "\nget all symbols...";
-	//https://finnhub.io/api/v1/stock/symbol?exchange=US
-	cpr::Response r = cpr::Get(cpr::Url{ "https://finnhub.io/api/v1/stock/symbol" },
-		//cpr::Authentication{"user", "pass", cpr::AuthMode::BASIC},
-		cpr::Parameters{ {"exchange", exchange}, {"token", secret_token.data()} });
-	/*
-	std::cout << r.status_code << '\n'                // 200
-		<< r.header["content-type"] << '\n'       // application/json; charset=utf-8
-		<< r.text;                         // JSON text string
-	*/
-
-	nlohmann::json stock_list = nlohmann::json::parse(r.text);
-
-	//std::cout << "\ncheck list..." << stock_list.is_array();
-	//std::cout << "\ncheck object..." << stock_list.is_object();
-
-	return stock_list;
-}
 
 
 nlohmann::json get_candles(const std::string& symbol) {
@@ -81,6 +96,7 @@ int main()
 {
 	init_logger();
 	const std::string json_file_name{ "summary.json" };
+	auto finn{ finnhub_rest_client(secret_token.data()) };
 
 	nlohmann::json summary{ nlohmann::json::object() };
 	//load json
@@ -102,7 +118,7 @@ int main()
 
 	// get all US stock symbols...
 	if (true) {
-		auto stock_list = get_stock_symbols("US");
+		auto stock_list = finn.getStockSymbols("US");
 		const std::string key{ "stock_list_US" };
 
 		summary[key] = stock_list;
