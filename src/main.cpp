@@ -15,29 +15,6 @@ class finnhub_rest_client2;
 static const std::string candles_Nvidia{ "candles_Nvidia" };
 
 
-nlohmann::json get_candles(const std::string& symbol) {
-	std::cout << "\nget all candles...";
-
-	//https://finnhub.io/api/v1/stock/candle?symbol=AAPL&resolution=1&from=1631022248&to=1631627048
-	cpr::Response r = cpr::Get(cpr::Url{ "https://finnhub.io/api/v1/stock/candle" },
-		//cpr::Authentication{"user", "pass", cpr::AuthMode::BASIC},
-		cpr::Parameters{
-			{"symbol", symbol},
-		{"resolution", "1"},
-		{"from", "1656662061"},
-		{"to", "1664531661"},
-		{"token", secret_token.data()}
-		});
-
-	nlohmann::json candles = nlohmann::json::parse(r.text);
-
-	//std::cout << "\ncheck list..." << stock_list.is_array();
-	//std::cout << "\ncheck object..." << stock_list.is_object();
-
-	return candles;
-}
-
-
 nlohmann::json get_share_details(const std::string& symbol) {
 	std::cout << "\nget details...";
 	//https://finnhub.io/api/v1/quote?symbol=AAPL
@@ -129,9 +106,8 @@ int main()
 
 	// get candles for NVDA...
 	if (true) {
-		auto candle_chart_data = get_candles("NVDA");
-
-		summary[candles_Nvidia] = candle_chart_data;
+		summary[candles_Nvidia] = finn.getStockCandles("NVDA", 1656662061, 1664531661, 1);
+		// TODO: list all possible resolutions!
 	}
 
 	// get details of a single stock
