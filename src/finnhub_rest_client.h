@@ -21,9 +21,21 @@ public:
 
 	finnhub_rest_client(const std::string& api_key) : api_key(api_key) {}
 
+	/**
+	* https://finnhub.io/docs/api/stock-symbols
+	*/
 	nlohmann::json getStockSymbols(const std::string& exchange = "US");
 
+	/**
+	* https://finnhub.io/docs/api/stock-candles
+	*/
 	nlohmann::json getStockCandles(const std::string& symbol, uint64_t from, uint64_t to, uint64_t resolution);
+
+	/**
+	* https://finnhub.io/docs/api/quote
+	*/
+	nlohmann::json getQuotes(const std::string& symbol);
+
 
 };
 

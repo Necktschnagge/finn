@@ -25,11 +25,11 @@ nlohmann::json finnhub_rest_client::getStockCandles(const std::string& symbol, u
 	finnhub_client_logger()->trace(std::string("url:   ").append(url.c_str()));
 	const auto params{
 		cpr::Parameters{
-		{ "symbol", symbol },
-		{ "resolution", std::to_string(resolution) },
-		{ "from", std::to_string(from) },
-		{ "to", std::to_string(to) },
-		{ "token", api_key }
+			{ "symbol", symbol },
+			{ "resolution", std::to_string(resolution) },
+			{ "from", std::to_string(from) },
+			{ "to", std::to_string(to) },
+			{ "token", api_key }
 		}
 	};
 	cpr::Response r = cpr::Get(url, params);
@@ -39,6 +39,31 @@ nlohmann::json finnhub_rest_client::getStockCandles(const std::string& symbol, u
 	try {
 		nlohmann::json candles = nlohmann::json::parse(r.text);
 		return candles;
+	}
+	catch (...) {
+		finnhub_client_logger()->error("Could not parse an http response as json.");
+		finnhub_client_logger()->trace(r.text);
+		throw response_json_error(std::string("Could not parse response from ").append(url.c_str()));
+	}
+}
+
+nlohmann::json finnhub_rest_client::getQuotes(const std::string& symbol) {
+	finnhub_client_logger()->debug(std::string("Getting quotes...   [").append(symbol).append("]"));
+	const auto url{ cpr::Url{ "https://finnhub.io/api/v1/quote" } };
+	finnhub_client_logger()->trace(std::string("url:   ").append(url.c_str()));
+	const auto params{
+		cpr::Parameters{
+			{ "symbol", symbol },
+			{ "token", api_key }
+		}
+	};
+	cpr::Response r = cpr::Get(url, params);
+	finnhub_client_logger()->trace(std::string("response status code:   ").append(std::to_string(r.status_code)));
+	finnhub_client_logger()->trace(std::string("response content type:   ").append(r.header["content-type"]));
+
+	try {
+		nlohmann::json quote = nlohmann::json::parse(r.text);
+		return quote;
 	}
 	catch (...) {
 		finnhub_client_logger()->error("Could not parse an http response as json.");

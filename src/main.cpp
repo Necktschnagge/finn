@@ -10,31 +10,7 @@
 #include <iostream>
 #include <fstream>
 
-class finnhub_rest_client2;
-
 static const std::string candles_Nvidia{ "candles_Nvidia" };
-
-
-nlohmann::json get_share_details(const std::string& symbol) {
-	std::cout << "\nget details...";
-	//https://finnhub.io/api/v1/quote?symbol=AAPL
-
-	cpr::Response r = cpr::Get(cpr::Url{ "https://finnhub.io/api/v1/quote" },
-		//cpr::Authentication{"user", "pass", cpr::AuthMode::BASIC},
-		cpr::Parameters{ {"symbol", symbol}, {"token", secret_token.data()} });
-	/*
-	std::cout << r.status_code << '\n'                // 200
-		<< r.header["content-type"] << '\n'       // application/json; charset=utf-8
-		<< r.text;                         // JSON text string
-	*/
-
-	nlohmann::json details = nlohmann::json::parse(r.text);
-
-	//std::cout << "\ncheck list..." << details.is_array();
-	//std::cout << "\ncheck object..." << details.is_object();
-
-	return details;
-}
 
 
 int main()
@@ -113,8 +89,8 @@ int main()
 	// get details of a single stock
 
 	if (true) {
-		summary["details_Nvidia"] = get_share_details("NVDA");
-		summary["details_Intel"] = get_share_details("INTC");
+		summary["details_Nvidia"] = finn.getQuotes("NVDA");
+		summary["details_Intel"] = finn.getQuotes("INTC");
 	}
 
 	//save json
