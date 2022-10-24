@@ -1,9 +1,8 @@
 #include "logger.h"
 
+#include "utility.h"
 #include "secrets.h"
 #include "finnhub_rest_client.h"
-
-#include <cpr/cpr.h>
 
 #include <nlohmann/json.hpp>
 
@@ -19,23 +18,7 @@ int main()
 	const std::string json_file_name{ "summary.json" };
 	auto finn{ finnhub_rest_client(secret_token.data()) };
 
-	nlohmann::json summary{ nlohmann::json::object() };
-	//load json
-	std::ifstream ofile;
-	ofile.open(json_file_name);
-	if (ofile.good()) { // check if opened a file
-		ofile >> std::noskipws;
-		try {
-			summary = nlohmann::json::parse(std::istream_iterator<std::ifstream::char_type>(ofile), std::istream_iterator<std::ifstream::char_type>());
-		}
-		catch (...) {
-			std::cerr << "Could not parse opened file named:   " << json_file_name << std::endl;
-		}
-		ofile.close();
-	}
-	else {
-		std::cerr << "Could not open a file named:   " << json_file_name << std::endl;
-	}
+	nlohmann::json summary{ load_json(json_file_name) };
 
 	// get all US stock symbols...
 	if (true) {
