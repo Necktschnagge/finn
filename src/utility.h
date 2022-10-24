@@ -13,6 +13,7 @@ namespace {
 
 inline nlohmann::json load_json(const std::string& file_name, const nlohmann::json& default_json = nlohmann::json::object()) {
 	std::ifstream ofile;
+	utility_logger()->debug("Try to open a file...");
 	ofile.open(file_name);
 	if (ofile.good()) { // check if opened a file
 		ofile >> std::noskipws;
@@ -29,4 +30,21 @@ inline nlohmann::json load_json(const std::string& file_name, const nlohmann::js
 	}
 	utility_logger()->info("Will return a default_json as specified.");
 	return default_json;
+}
+
+
+inline void try_sort_stock_list(nlohmann::json& stock_list) {
+	if (stock_list.is_array())
+		std::sort(
+			stock_list.begin(),
+			stock_list.end(),
+			[](const auto& a, const auto& b) {
+				try {
+					return a.at("symbol") < b.at("symbol");
+				}
+				catch (...) {
+					return false;
+				}
+			}
+	);
 }

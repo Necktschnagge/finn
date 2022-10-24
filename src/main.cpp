@@ -10,57 +10,31 @@
 #include <fstream>
 
 static const std::string candles_Nvidia{ "candles_Nvidia" };
+static const std::string json_file_name{ "summary.json" };
 
 
 int main()
 {
 	init_logger();
-	const std::string json_file_name{ "summary.json" };
+	
 	auto finn{ finnhub_rest_client(secret_token.data()) };
-
+	
 	nlohmann::json summary{ load_json(json_file_name) };
-
+	
 	// get all US stock symbols...
 	if (true) {
 		auto stock_list = finn.getStockSymbols("US");
 		const std::string key{ "stock_list_US" };
-
 		summary[key] = stock_list;
-		if (summary[key].is_array())
-			std::sort(
-				summary[key].begin(),
-				summary[key].end(),
-				[](const auto& a, const auto& b) {
-					try {
-						return a.at("symbol") < b.at("symbol");
-					}
-					catch (...) {
-						return false;
-					}
-				}
-		);
+		try_sort_stock_list(summary[key]);
 	}
 
 	// get all DE stock symbols...
 	if (true) {
 		auto stock_list = finn.getStockSymbols("DE");
 		const std::string key{ "stock_list_DE" };
-
 		summary[key] = stock_list;
-		if (summary[key].is_array())
-			std::sort(
-				summary[key].begin(),
-				summary[key].end(),
-				[](const auto& a, const auto& b) {
-					try {
-						return a.at("symbol") < b.at("symbol");
-					}
-					catch (...) {
-						return false;
-					}
-				}
-		);
-
+		try_sort_stock_list(summary[key]);
 	}
 
 	// get candles for NVDA...
