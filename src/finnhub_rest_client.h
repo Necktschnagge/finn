@@ -32,8 +32,10 @@ private:
 		}
 	}
 
-	inline static nlohmann::json ensured_finnhub_api_request(const cpr::Url& url, const cpr::Parameters& params) {
+	inline nlohmann::json ensured_finnhub_api_request(const cpr::Url& url, cpr::Parameters& params) {
 		using namespace std::chrono_literals;
+
+		params.Add({ "token", api_key });
 		finnhub_client_logger()->trace(std::string("url:   ").append(url.c_str()));
 	ensured_finnhub_api_request__again_request:
 		cpr::Response r = cpr::Get(url, params);
