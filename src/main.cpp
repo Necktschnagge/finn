@@ -9,8 +9,34 @@
 #include <iostream>
 #include <fstream>
 
-static const std::string candles_Nvidia{ "candles_Nvidia" };
-static const std::string json_file_name{ "summary.json" };
+namespace playground {
+	static const std::string json_file_name{ "summary.json" };
+
+	static const std::string DE{ "DE" };
+	static const std::string US{ "US" };
+
+	namespace sheep {
+
+		static const std::string stock_list_DE{ "stock_list_DE" };
+		static const std::string stock_list_US{ "stock_list_US" };
+
+		
+		static const std::string NVDA{ "NVDA" };
+		static const std::string NVDA_Quotes{ "NVDA-Quote" };
+		static const std::string NVDA_Candles{ "NVDA-Candles" };
+
+
+		static const std::string INTC{ "INTC" };
+		static const std::string INTC_Quotes{ "INTC-Quote" };
+		static const std::string INTC_Candles{ "INTC-Candles" };
+
+	}
+
+	namespace rooster {
+
+	}
+
+}
 
 
 int main()
@@ -19,44 +45,38 @@ int main()
 	
 	auto finn{ finnhub_rest_client(secret_token.data()) };
 	
-	nlohmann::json summary{ load_json(json_file_name) };
+	nlohmann::json summary{ load_json(playground::json_file_name) };
 	
 	// get all US stock symbols...
 	if (true) {
-		auto stock_list = finn.getStockSymbols("US");
-		const std::string key{ "stock_list_US" };
-		summary[key] = stock_list;
-		try_sort_stock_list(summary[key]);
+		auto stock_list = finn.getStockSymbols(playground::US);
+		summary[playground::sheep::stock_list_US] = stock_list;
+		try_sort_stock_list(summary[playground::sheep::stock_list_US]);
 	}
 
 	// get all DE stock symbols...
 	if (true) {
-		auto stock_list = finn.getStockSymbols("DE");
-		const std::string key{ "stock_list_DE" };
-		summary[key] = stock_list;
-		try_sort_stock_list(summary[key]);
+		auto stock_list = finn.getStockSymbols(playground::DE);
+		summary[playground::sheep::stock_list_DE] = stock_list;
+		try_sort_stock_list(summary[playground::sheep::stock_list_DE]);
 	}
 
-	// get candles for NVDA...
+	// get candles for...
 	if (true) {
-		summary[candles_Nvidia] = finn.getStockCandles("NVDA", 1656662061, 1664531661, 1);
+		summary[playground::sheep::NVDA_Candles] = finn.getStockCandles(playground::sheep::NVDA, 1656662061, 1664531661, 1);
+		summary[playground::sheep::INTC_Candles] = finn.getStockCandles(playground::sheep::INTC, 1656662061, 1664531661, 1);
 		// TODO: list all possible resolutions!
 	}
 
-	// get details of a single stock
-
+	// get curreent price, delta, open, previous close, day high, day low... of a single stock
 	if (true) {
-		summary["details_Nvidia"] = finn.getQuotes("NVDA");
-		summary["details_Intel"] = finn.getQuotes("INTC");
+		summary[playground::sheep::NVDA_Quotes] = finn.getQuotes(playground::sheep::NVDA);
+		summary[playground::sheep::INTC_Quotes] = finn.getQuotes(playground::sheep::INTC);
 	}
 
 	//save json
-	std::ofstream file;
-	file.open(json_file_name);
-	file << summary.dump(3);
-
+	save_json(playground::json_file_name, summary);
 	return 0;
-
 }
 
 #if false
