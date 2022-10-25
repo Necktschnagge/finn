@@ -13,6 +13,7 @@ namespace feature_toogle {
 
 	namespace sheep {
 		static constexpr bool FOLD_US_STOCK_CURRENCIES{ true };
+		static constexpr bool TEST_API_LIMIT{ false };
 	}
 }
 
@@ -94,6 +95,15 @@ int main()
 
 	if constexpr (feature_toogle::sheep::FOLD_US_STOCK_CURRENCIES) {
 		summary[playground::sheep::stock_list_US_currencies] = fold_json_object_array_into_value_set(summary[playground::sheep::stock_list_US], "currency");
+	}
+
+	if constexpr (feature_toogle::sheep::TEST_API_LIMIT) {
+		using namespace std::chrono_literals;
+		for (int x = 0; x < 70; ++x) {
+
+			summary["test"] = finn.getQuotes(playground::sheep::NVDA);
+			std::this_thread::sleep_for(200ms);
+		}
 	}
 
 	//save json
