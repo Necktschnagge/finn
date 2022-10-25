@@ -58,7 +58,7 @@ public:
 	/**
 	* https://finnhub.io/docs/api/company-profile2
 	*/
-	nlohmann::json finnhub_rest_client::getStockProfile2(const std::string& symbol);
+	nlohmann::json getStockProfile2(const std::string& symbol);
 
 	/**
 	* https://finnhub.io/docs/api/stock-candles
