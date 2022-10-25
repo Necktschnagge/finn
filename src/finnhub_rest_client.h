@@ -7,8 +7,6 @@
 #include <string>
 
 class finnhub_rest_client final {
-private:
-	std::string api_key;
 public:
 	class response_json_error : public std::runtime_error {
 	public:
@@ -19,6 +17,20 @@ public:
 		}
 	};
 
+private:
+	std::string api_key;
+
+	inline static nlohmann::json try_parse_api_response(const std::string& text, const cpr::Url& url) {
+		try {
+			return nlohmann::json::parse(text);
+		}
+		catch (...) {
+			finnhub_client_logger()->error("Could not parse an http response as json.");
+			finnhub_client_logger()->trace(text.size() > 100 ? text.substr(0,100) : text);
+			throw response_json_error(std::string("Could not parse a response from ").append(url.c_str()));
+		}
+	}
+public:
 	finnhub_rest_client(const std::string& api_key) : api_key(api_key) {}
 
 	/**

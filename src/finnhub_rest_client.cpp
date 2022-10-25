@@ -8,15 +8,8 @@ nlohmann::json finnhub_rest_client::getStockSymbols(const std::string& exchange)
 	cpr::Response r = cpr::Get(url, params);
 	finnhub_client_logger()->trace(std::string("response status code:   ").append(std::to_string(r.status_code)));
 	finnhub_client_logger()->trace(std::string("response content type:   ").append(r.header["content-type"]));
-	try {
-		nlohmann::json stock_list = nlohmann::json::parse(r.text);
-		return stock_list;
-	}
-	catch (...) {
-		finnhub_client_logger()->error("Could not parse an http response as json.");
-		finnhub_client_logger()->trace(r.text);
-		throw response_json_error(std::string("Could not parse response from ").append(url.c_str()));
-	}
+
+	return try_parse_api_response(r.text, url);
 }
 
 nlohmann::json finnhub_rest_client::getStockProfile2(const std::string& symbol) {
@@ -33,15 +26,7 @@ nlohmann::json finnhub_rest_client::getStockProfile2(const std::string& symbol) 
 	finnhub_client_logger()->trace(std::string("response status code:   ").append(std::to_string(r.status_code)));
 	finnhub_client_logger()->trace(std::string("response content type:   ").append(r.header["content-type"]));
 
-	try {
-		nlohmann::json profile2 = nlohmann::json::parse(r.text);
-		return profile2;
-	}
-	catch (...) {
-		finnhub_client_logger()->error("Could not parse an http response as json.");
-		finnhub_client_logger()->trace(r.text);
-		throw response_json_error(std::string("Could not parse response from ").append(url.c_str()));
-	}
+	return try_parse_api_response(r.text, url);
 }
 
 nlohmann::json finnhub_rest_client::getStockCandles(const std::string& symbol, uint64_t from, uint64_t to, uint64_t resolution) {
@@ -61,15 +46,7 @@ nlohmann::json finnhub_rest_client::getStockCandles(const std::string& symbol, u
 	finnhub_client_logger()->trace(std::string("response status code:   ").append(std::to_string(r.status_code)));
 	finnhub_client_logger()->trace(std::string("response content type:   ").append(r.header["content-type"]));
 
-	try {
-		nlohmann::json candles = nlohmann::json::parse(r.text);
-		return candles;
-	}
-	catch (...) {
-		finnhub_client_logger()->error("Could not parse an http response as json.");
-		finnhub_client_logger()->trace(r.text);
-		throw response_json_error(std::string("Could not parse response from ").append(url.c_str()));
-	}
+	return try_parse_api_response(r.text, url);
 }
 
 nlohmann::json finnhub_rest_client::getQuotes(const std::string& symbol) {
@@ -86,13 +63,5 @@ nlohmann::json finnhub_rest_client::getQuotes(const std::string& symbol) {
 	finnhub_client_logger()->trace(std::string("response status code:   ").append(std::to_string(r.status_code)));
 	finnhub_client_logger()->trace(std::string("response content type:   ").append(r.header["content-type"]));
 
-	try {
-		nlohmann::json quote = nlohmann::json::parse(r.text);
-		return quote;
-	}
-	catch (...) {
-		finnhub_client_logger()->error("Could not parse an http response as json.");
-		finnhub_client_logger()->trace(r.text);
-		throw response_json_error(std::string("Could not parse response from ").append(url.c_str()));
-	}
+	return try_parse_api_response(r.text, url);
 }
