@@ -4,6 +4,7 @@
 #include <cpr/cpr.h>
 #include <nlohmann/json.hpp>
 
+#include <chrono>
 #include <string>
 
 class finnhub_rest_client final {
@@ -26,10 +27,26 @@ private:
 		}
 		catch (...) {
 			finnhub_client_logger()->error("Could not parse an http response as json.");
-			finnhub_client_logger()->trace(text.size() > 100 ? text.substr(0,100) : text);
+			finnhub_client_logger()->trace(text.size() > 100 ? text.substr(0, 100) : text);
 			throw response_json_error(std::string("Could not parse a response from ").append(url.c_str()));
 		}
 	}
+
+	inline static nlohmann::json ensured_finnhub_api_request(const cpr::Url& url, const cpr::Parameters& params) {
+		using namespace std::chrono_literals;
+		finnhub_client_logger()->trace(std::string("url:   ").append(url.c_str()));
+	ensured_finnhub_api_request__again_request:
+		cpr::Response r = cpr::Get(url, params);
+		finnhub_client_logger()->trace(std::string("response status code:   ").append(std::to_string(r.status_code)));
+		if (r.status_code == 429) {
+			finnhub_client_logger()->debug("Encountered api limit exceed.Trying again...");
+			std::this_thread::sleep_for(2s);
+			goto ensured_finnhub_api_request__again_request;
+		}
+		finnhub_client_logger()->trace(std::string("response content type:   ").append(r.header["content-type"]));
+		return try_parse_api_response(r.text, url);
+	}
+
 public:
 	finnhub_rest_client(const std::string& api_key) : api_key(api_key) {}
 
@@ -37,7 +54,7 @@ public:
 	* https://finnhub.io/docs/api/stock-symbols
 	*/
 	nlohmann::json getStockSymbols(const std::string& exchange = "US");
-	
+
 	/**
 	* https://finnhub.io/docs/api/company-profile2
 	*/
