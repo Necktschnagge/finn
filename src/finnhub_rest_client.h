@@ -25,6 +25,11 @@ public:
 	* https://finnhub.io/docs/api/stock-symbols
 	*/
 	nlohmann::json getStockSymbols(const std::string& exchange = "US");
+	
+	/**
+	* https://finnhub.io/docs/api/company-profile2
+	*/
+	nlohmann::json finnhub_rest_client::getStockProfile2(const std::string& symbol);
 
 	/**
 	* https://finnhub.io/docs/api/stock-candles

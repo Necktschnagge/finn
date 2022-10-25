@@ -24,11 +24,13 @@ namespace playground {
 		static const std::string NVDA{ "NVDA" };
 		static const std::string NVDA_Quotes{ "NVDA-Quote" };
 		static const std::string NVDA_Candles{ "NVDA-Candles" };
+		static const std::string NVDA_Profile2{ "NVDA-Profile2" };
 
 
 		static const std::string INTC{ "INTC" };
 		static const std::string INTC_Quotes{ "INTC-Quote" };
 		static const std::string INTC_Candles{ "INTC-Candles" };
+		static const std::string INTC_Profile2{ "INTC-Profile2" };
 
 	}
 
@@ -45,6 +47,7 @@ int main()
 	
 	auto finn{ finnhub_rest_client(secret_token.data()) };
 	
+	// load previous json...
 	nlohmann::json summary{ load_json(playground::json_file_name) };
 	
 	// get all US stock symbols...
@@ -54,7 +57,7 @@ int main()
 		try_sort_stock_list(summary[playground::sheep::stock_list_US]);
 	}
 
-	// get all DE stock symbols...
+	// get all DE stock symbols... needs expensive purchase plan...
 	if (true) {
 		auto stock_list = finn.getStockSymbols(playground::DE);
 		summary[playground::sheep::stock_list_DE] = stock_list;
@@ -68,10 +71,16 @@ int main()
 		// TODO: list all possible resolutions!
 	}
 
-	// get curreent price, delta, open, previous close, day high, day low... of a single stock
+	// get current price, delta, open, previous close, day high, day low... of a single stock
 	if (true) {
 		summary[playground::sheep::NVDA_Quotes] = finn.getQuotes(playground::sheep::NVDA);
 		summary[playground::sheep::INTC_Quotes] = finn.getQuotes(playground::sheep::INTC);
+	}
+
+	// get company profile...
+	if (true) {
+		summary[playground::sheep::NVDA_Profile2] = finn.getStockProfile2(playground::sheep::NVDA);
+		summary[playground::sheep::INTC_Profile2] = finn.getStockProfile2(playground::sheep::INTC);
 	}
 
 	//save json
