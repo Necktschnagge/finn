@@ -9,6 +9,13 @@
 #include <iostream>
 #include <fstream>
 
+namespace feature_toogle {
+
+	namespace sheep {
+		static constexpr bool FOLD_US_STOCK_CURRENCIES{ true };
+	}
+}
+
 namespace playground {
 	static const std::string json_file_name{ "summary.json" };
 
@@ -20,7 +27,9 @@ namespace playground {
 		static const std::string stock_list_DE{ "stock_list_DE" };
 		static const std::string stock_list_US{ "stock_list_US" };
 
-		
+		static const std::string stock_list_US_currencies{ "stock_list_US_currencies" };
+
+
 		static const std::string NVDA{ "NVDA" };
 		static const std::string NVDA_Quotes{ "NVDA-Quote" };
 		static const std::string NVDA_Candles{ "NVDA-Candles" };
@@ -44,12 +53,12 @@ namespace playground {
 int main()
 {
 	init_logger();
-	
+
 	auto finn{ finnhub_rest_client(secret_token.data()) };
-	
+
 	// load previous json...
 	nlohmann::json summary{ load_json(playground::json_file_name) };
-	
+
 	// get all US stock symbols...
 	if (true) {
 		auto stock_list = finn.getStockSymbols(playground::US);
@@ -81,6 +90,30 @@ int main()
 	if (true) {
 		summary[playground::sheep::NVDA_Profile2] = finn.getStockProfile2(playground::sheep::NVDA);
 		summary[playground::sheep::INTC_Profile2] = finn.getStockProfile2(playground::sheep::INTC);
+	}
+
+	if constexpr (feature_toogle::sheep::FOLD_US_STOCK_CURRENCIES) {
+		std::set<std::string> currencies;
+		if (!summary[playground::sheep::stock_list_US].is_array()) {
+			standard_logger()->error("Fold currencies type error 1");
+		}
+		else {
+			std::transform(
+				summary[playground::sheep::stock_list_US].cbegin(),
+				summary[playground::sheep::stock_list_US].cend(),
+				std::inserter(currencies, currencies.cbegin()),
+				[](const nlohmann::json& obj) {
+					try {
+						return obj.at("currency").get<std::string>();
+					}
+					catch (...) {
+						return std::string("ERROR");
+					}
+				}
+			);
+		}
+		summary[playground::sheep::stock_list_US_currencies] = nlohmann::json::array();
+		std::copy(currencies.cbegin(), currencies.cend(), std::back_inserter(summary[playground::sheep::stock_list_US_currencies]));
 	}
 
 	//save json
