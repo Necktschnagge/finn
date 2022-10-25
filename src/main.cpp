@@ -93,15 +93,17 @@ int main()
 		summary[playground::sheep::INTC_Profile2] = finn.getStockProfile2(playground::sheep::INTC);
 	}
 
+	// check which currencies US stocks can have...
 	if constexpr (feature_toogle::sheep::FOLD_US_STOCK_CURRENCIES) {
 		summary[playground::sheep::stock_list_US_currencies] = fold_json_object_array_into_value_set(summary[playground::sheep::stock_list_US], "currency");
 	}
 
+	// check if the application still works fine when exceeding the api limit...
 	if constexpr (feature_toogle::sheep::TEST_API_LIMIT) {
 		using namespace std::chrono_literals;
 		for (int x = 0; x < 70; ++x) {
 
-			summary["test"] = finn.getQuotes(playground::sheep::NVDA);
+			nlohmann::json test = finn.getQuotes(playground::sheep::NVDA);
 			std::this_thread::sleep_for(200ms);
 		}
 	}
