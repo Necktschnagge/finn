@@ -93,27 +93,7 @@ int main()
 	}
 
 	if constexpr (feature_toogle::sheep::FOLD_US_STOCK_CURRENCIES) {
-		std::set<std::string> currencies;
-		if (!summary[playground::sheep::stock_list_US].is_array()) {
-			standard_logger()->error("Fold currencies type error 1");
-		}
-		else {
-			std::transform(
-				summary[playground::sheep::stock_list_US].cbegin(),
-				summary[playground::sheep::stock_list_US].cend(),
-				std::inserter(currencies, currencies.cbegin()),
-				[](const nlohmann::json& obj) {
-					try {
-						return obj.at("currency").get<std::string>();
-					}
-					catch (...) {
-						return std::string("ERROR");
-					}
-				}
-			);
-		}
-		summary[playground::sheep::stock_list_US_currencies] = nlohmann::json::array();
-		std::copy(currencies.cbegin(), currencies.cend(), std::back_inserter(summary[playground::sheep::stock_list_US_currencies]));
+		summary[playground::sheep::stock_list_US_currencies] = fold_json_object_array_into_value_set(summary[playground::sheep::stock_list_US], "currency");
 	}
 
 	//save json

@@ -4,6 +4,7 @@
 #include <nlohmann/json.hpp>
 
 #include <string>
+#include <set>
 
 #include <fstream>
 
@@ -52,4 +53,30 @@ inline void try_sort_stock_list(nlohmann::json& stock_list) {
 				}
 			}
 	);
+}
+
+
+inline nlohmann::json fold_json_object_array_into_value_set(const nlohmann::json& array_of_objects, const std::string& property_of_interest, const std::string& ERROR_VALUE = "ERROR") {
+	std::set<std::string> accumulated;
+	if (!array_of_objects.is_array()) {
+		standard_logger()->error("Cannot fold given json. It is not an array!");
+	}
+	else {
+		std::transform(
+			array_of_objects.cbegin(),
+			array_of_objects.cend(),
+			std::inserter(accumulated, accumulated.cbegin()),
+			[&property_of_interest,&ERROR_VALUE](const nlohmann::json& obj) {
+				try {
+					return obj.at(property_of_interest).get<std::string>();
+				}
+				catch (...) {
+					return ERROR_VALUE;
+				}
+			}
+		);
+	}
+	nlohmann::json result = nlohmann::json::array();
+	std::copy(accumulated.cbegin(), accumulated.cend(), std::back_inserter(result));
+	return result;
 }
