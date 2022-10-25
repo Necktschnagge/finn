@@ -78,16 +78,3 @@ int main()
 	save_json(playground::json_file_name, summary);
 	return 0;
 }
-
-#if false
-//////////////// a bunch of trash:
-
-if (false) { // rename a key...
-	summary["stock_list_US"] = summary["stock_list"];
-	auto it = summary.find("stock_list");
-	auto jt = it;
-	summary.erase("stock_list");
-}
-
-#endif
-
