@@ -32,7 +32,7 @@ private:
 		}
 	}
 
-	inline nlohmann::json ensured_finnhub_api_request(const cpr::Url& url, cpr::Parameters& params) {
+	inline nlohmann::json ensured_finnhub_api_request(const cpr::Url& url, cpr::Parameters& params) const {
 		using namespace std::chrono_literals;
 
 		params.Add({ "token", api_key });
@@ -55,22 +55,22 @@ public:
 	/**
 	* https://finnhub.io/docs/api/stock-symbols
 	*/
-	nlohmann::json getStockSymbols(const std::string& exchange = "US");
+	nlohmann::json getStockSymbols(const std::string& exchange = "US") const;
 
 	/**
 	* https://finnhub.io/docs/api/company-profile2
 	*/
-	nlohmann::json getStockProfile2(const std::string& symbol);
+	nlohmann::json getStockProfile2(const std::string& symbol) const;
 
 	/**
 	* https://finnhub.io/docs/api/stock-candles
 	*/
-	nlohmann::json getStockCandles(const std::string& symbol, uint64_t from, uint64_t to, uint64_t resolution);
-
+	nlohmann::json getStockCandles(const std::string& symbol, uint64_t from, uint64_t to, uint64_t resolution) const;
+	
 	/**
 	* https://finnhub.io/docs/api/quote
 	*/
-	nlohmann::json getQuotes(const std::string& symbol);
+	nlohmann::json getQuotes(const std::string& symbol) const;
 
 
 };
