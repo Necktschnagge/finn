@@ -68,9 +68,6 @@ steps:
  - script: ./build/src/$(project_name)
    displayName: "Runtime Check on Linux"
    condition: and(succeeded(), eq( variables['Agent.OS'], 'Linux'))
- - script: ./build/$(project_name)
-   displayName: "Runtime Check on Linux"
-   condition: and(succeeded(), eq( variables['Agent.OS'], 'Linux'))
  - script: .\build\Debug\TEST-$(project_name).exe
    displayName: "Run Tests on Windows"
    condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
