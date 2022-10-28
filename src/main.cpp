@@ -31,6 +31,12 @@ namespace playground {
 		static const std::string stock_list_US_currencies{ "stock_list_US_currencies" };
 
 
+		static const std::string BBBY{ "BBBY" };
+		static const std::string BBBY_Quotes{ "BBBY-Quote" };
+		static const std::string BBBY_Candles{ "BBBY-Candles" };
+		static const std::string BBBY_Profile2{"BBBY-Profile2" };
+
+
 		static const std::string NVDA{ "NVDA" };
 		static const std::string NVDA_Quotes{ "NVDA-Quote" };
 		static const std::string NVDA_Candles{ "NVDA-Candles" };
@@ -85,12 +91,14 @@ int main()
 	if (true) {
 		summary[playground::sheep::NVDA_Quotes] = finn.getQuotes(playground::sheep::NVDA);
 		summary[playground::sheep::INTC_Quotes] = finn.getQuotes(playground::sheep::INTC);
+		summary[playground::sheep::BBBY_Quotes] = finn.getQuotes(playground::sheep::BBBY);
 	}
 
 	// get company profile...
 	if (true) {
 		summary[playground::sheep::NVDA_Profile2] = finn.getStockProfile2(playground::sheep::NVDA);
 		summary[playground::sheep::INTC_Profile2] = finn.getStockProfile2(playground::sheep::INTC);
+		summary[playground::sheep::BBBY_Profile2] = finn.getStockProfile2(playground::sheep::BBBY);
 	}
 
 	// check which currencies US stocks can have...
