@@ -65,6 +65,9 @@ int main()
 
 	// load previous json...
 	nlohmann::json summary{ load_json(playground::json_file_name) };
+	standard_logger()->error("check some summary properties: array, object");
+	standard_logger()->error(summary.is_array());
+	standard_logger()->error(summary.is_object());
 
 	// get all US stock symbols...
 	if (true) {
