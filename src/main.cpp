@@ -64,7 +64,7 @@ int main()
 	auto finn{ finnhub_rest_client(secret_token.data()) };
 
 	// load previous json...
-	lohmann::json summary = load_json(playground::json_file_name);
+	nlohmann::json summary = load_json(playground::json_file_name);
 
 	// get all US stock symbols...
 	if (true) {
