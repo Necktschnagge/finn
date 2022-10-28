@@ -64,10 +64,7 @@ int main()
 	auto finn{ finnhub_rest_client(secret_token.data()) };
 
 	// load previous json...
-	auto summary{ nlohmann::json(load_json(playground::json_file_name)) };
-	standard_logger()->error("check some summary properties: array, object");
-	standard_logger()->error(summary.is_array());
-	standard_logger()->error(summary.is_object());
+	lohmann::json summary = load_json(playground::json_file_name);
 
 	// get all US stock symbols...
 	if (true) {
