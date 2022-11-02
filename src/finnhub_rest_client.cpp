@@ -1,5 +1,16 @@
 #include "finnhub_rest_client.h"
 
+nlohmann::json finnhub_rest_client::getSymbolLookup(const std::string& query_string) const
+{
+	finnhub_client_logger()->debug(std::string("Searching for shares...   [").append(query_string).append("]"));
+	const auto url{ cpr::Url{ "https://finnhub.io/api/v1/search" } };
+	auto params{
+		cpr::Parameters{ { "q", query_string } }
+	};
+
+	return ensured_finnhub_api_request(url, params);
+}
+
 nlohmann::json finnhub_rest_client::getStockSymbols(const std::string& exchange) const {
 	finnhub_client_logger()->debug(std::string("Getting stock symbols...   [").append(exchange).append("]"));
 	const auto url{ cpr::Url{ "https://finnhub.io/api/v1/stock/symbol" } };
@@ -10,12 +21,25 @@ nlohmann::json finnhub_rest_client::getStockSymbols(const std::string& exchange)
 	return ensured_finnhub_api_request(url, params);
 }
 
-nlohmann::json finnhub_rest_client::getStockProfile2(const std::string& symbol) const {
+nlohmann::json finnhub_rest_client::getCompanyProfile2(const std::string& symbol) const {
 	finnhub_client_logger()->debug(std::string("Getting stock profile2...   [").append(symbol).append("]"));
 	const auto url{ cpr::Url{ "https://finnhub.io/api/v1/stock/profile2" } };
 	auto params{
 		cpr::Parameters{
 			{ "symbol", symbol }
+		}
+	};
+
+	return ensured_finnhub_api_request(url, params);
+}
+
+nlohmann::json finnhub_rest_client::getNews(const market_news_category& category, uint64_t min_id) const {
+	finnhub_client_logger()->debug(std::string("Getting market news...   [").append(static_cast<std::string>(category)).append(",").append(std::to_string(min_id)).append("]"));
+	const auto url{ cpr::Url{ "https://finnhub.io/api/v1/news" } };
+	auto params{
+		cpr::Parameters{
+			{ "category", category },
+			{ "minId", std::to_string(min_id)}
 		}
 	};
 

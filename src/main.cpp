@@ -30,6 +30,10 @@ namespace playground {
 
 		static const std::string stock_list_US_currencies{ "stock_list_US_currencies" };
 
+		static const std::string News{ "News" };
+
+		static const std::string AMD{ "AMD" };
+		static const std::string AMD_ISIN{ "US0079031078" };
 
 		static const std::string BBBY{ "BBBY" };
 		static const std::string BBBY_Quotes{ "BBBY-Quote" };
@@ -96,9 +100,19 @@ int main()
 
 	// get company profile...
 	if (true) {
-		summary[playground::sheep::NVDA_Profile2] = finn.getStockProfile2(playground::sheep::NVDA);
-		summary[playground::sheep::INTC_Profile2] = finn.getStockProfile2(playground::sheep::INTC);
-		summary[playground::sheep::BBBY_Profile2] = finn.getStockProfile2(playground::sheep::BBBY);
+		summary[playground::sheep::NVDA_Profile2] = finn.getCompanyProfile2(playground::sheep::NVDA);
+		summary[playground::sheep::INTC_Profile2] = finn.getCompanyProfile2(playground::sheep::INTC);
+		summary[playground::sheep::BBBY_Profile2] = finn.getCompanyProfile2(playground::sheep::BBBY);
+	}
+
+	// search for a share using ISIN
+	if (true) {
+		summary[playground::sheep::AMD] = finn.getSymbolLookup(playground::sheep::AMD_ISIN);
+	}
+
+	// get general market news
+	if (true) {
+		summary[playground::sheep::News] = finn.getNews(finnhub_rest_client::market_news_category::values::general);
 	}
 
 	// check which currencies US stocks can have...

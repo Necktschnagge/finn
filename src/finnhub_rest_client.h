@@ -18,6 +18,34 @@ public:
 		}
 	};
 
+	class market_news_category {
+	public:
+		enum class values {
+			general = 0,
+			forex = 1,
+			crypto = 2,
+			merger = 3
+		};
+	private:
+		values v;
+	public:
+		market_news_category(const values& value) : v(value) {}
+
+		operator std::string() const {
+			switch (v) {
+			case values::general:
+				return "general";
+			case values::forex:
+				return "forex";
+			case values::crypto:
+				return "crypto";
+			case values::merger:
+				return "merger";
+			}
+			throw std::runtime_error("market_news_category does not know an enum class value.");
+		}
+	};
+
 private:
 	std::string api_key;
 
@@ -34,11 +62,11 @@ private:
 
 	inline nlohmann::json ensured_finnhub_api_request(const cpr::Url& url, cpr::Parameters& params) const {
 		using namespace std::chrono_literals;
-
-		params.Add({ "token", api_key });
+		cpr::Header header{ { "X-Finnhub-Token", api_key } };
+		//params.Add({ "token", api_key }); <-- You can use this instead of passing the api_key inside the header.
 		finnhub_client_logger()->trace(std::string("url:   ").append(url.c_str()));
 	ensured_finnhub_api_request__again_request:
-		cpr::Response r = cpr::Get(url, params);
+		cpr::Response r = cpr::Get(url, header, params);
 		finnhub_client_logger()->trace(std::string("response status code:   ").append(std::to_string(r.status_code)));
 		if (r.status_code == 429) {
 			finnhub_client_logger()->debug("Encountered api limit exceed.Trying again...");
@@ -53,6 +81,12 @@ public:
 	finnhub_rest_client(const std::string& api_key) : api_key(api_key) {}
 
 	/**
+	* https://finnhub.io/docs/api/symbol-search
+	* You can find Sybols using the ISIN or company name etc. "symbol, name, isin, or cusip"
+	*/
+	nlohmann::json getSymbolLookup(const std::string& query_string) const;
+
+	/**
 	* https://finnhub.io/docs/api/stock-symbols
 	*/
 	nlohmann::json getStockSymbols(const std::string& exchange = "US") const;
@@ -60,13 +94,18 @@ public:
 	/**
 	* https://finnhub.io/docs/api/company-profile2
 	*/
-	nlohmann::json getStockProfile2(const std::string& symbol) const;
+	nlohmann::json getCompanyProfile2(const std::string& symbol) const;
+
+	/**
+	* https://finnhub.io/docs/api/market-news
+	*/
+	nlohmann::json getNews(const market_news_category& category, uint64_t min_id = 0) const;
 
 	/**
 	* https://finnhub.io/docs/api/stock-candles
 	*/
 	nlohmann::json getStockCandles(const std::string& symbol, uint64_t from, uint64_t to, uint64_t resolution) const;
-	
+
 	/**
 	* https://finnhub.io/docs/api/quote
 	*/
@@ -75,3 +114,14 @@ public:
 
 };
 
+/**
+ API endpoint not yet tested:
+
+Webhook https://finnhub.io/docs/api/webhook
+Trades - Last Price Updates https://finnhub.io/docs/api/websocket-trades
+Symbol Lookup https://finnhub.io/docs/api/symbol-search -> done
+
+
+What are the intervals allowed for candle stick query? use the query tp build continuous chart´...
+
+*/
