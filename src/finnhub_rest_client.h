@@ -120,6 +120,9 @@ public:
 Webhook https://finnhub.io/docs/api/webhook
 Trades - Last Price Updates https://finnhub.io/docs/api/websocket-trades
 Symbol Lookup https://finnhub.io/docs/api/symbol-search -> done
+Company News https://finnhub.io/docs/api/company-news
+Company Peers https://finnhub.io/docs/api/company-peers
+Basic Financials https://finnhub.io/docs/api/company-basic-financials
 
 
 What are the intervals allowed for candle stick query? use the query tp build continuous chart´...
