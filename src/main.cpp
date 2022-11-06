@@ -44,6 +44,7 @@ namespace playground {
 		static const std::string NVDA{ "NVDA" };
 		static const std::string NVDA_Quotes{ "NVDA-Quote" };
 		static const std::string NVDA_Candles{ "NVDA-Candles" };
+		static const std::string NVDA_Basics{ "NVDA-Basics" };
 		static const std::string NVDA_Profile2{ "NVDA-Profile2" };
 
 
@@ -103,6 +104,9 @@ int main()
 		summary[playground::sheep::NVDA_Profile2] = finn.getCompanyProfile2(playground::sheep::NVDA);
 		summary[playground::sheep::INTC_Profile2] = finn.getCompanyProfile2(playground::sheep::INTC);
 		summary[playground::sheep::BBBY_Profile2] = finn.getCompanyProfile2(playground::sheep::BBBY);
+
+
+		summary[playground::sheep::NVDA_Basics] = finn.getStockBasicFinancials(playground::sheep::NVDA);
 	}
 
 	// search for a share using ISIN

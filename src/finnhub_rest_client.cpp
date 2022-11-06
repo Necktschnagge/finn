@@ -46,6 +46,20 @@ nlohmann::json finnhub_rest_client::getNews(const market_news_category& category
 	return ensured_finnhub_api_request(url, params);
 }
 
+nlohmann::json finnhub_rest_client::getStockBasicFinancials(const std::string& symbol, const std::string& metric) const
+{
+	finnhub_client_logger()->debug(std::string("Getting stock basic financials...   [").append(symbol).append("]"));
+	const auto url{ cpr::Url{ "https://finnhub.io/api/v1/stock/metric" } };
+	auto params{
+		cpr::Parameters{
+			{ "symbol", symbol },
+			{ "metric", metric }
+		}
+	};
+
+	return ensured_finnhub_api_request(url, params);
+}
+
 nlohmann::json finnhub_rest_client::getStockCandles(const std::string& symbol, uint64_t from, uint64_t to, uint64_t resolution) const {
 	finnhub_client_logger()->debug(std::string("Getting stock candles...   [").append(symbol).append("]"));
 	const auto url{ cpr::Url{ "https://finnhub.io/api/v1/stock/candle" } };

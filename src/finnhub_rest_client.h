@@ -102,6 +102,11 @@ public:
 	nlohmann::json getNews(const market_news_category& category, uint64_t min_id = 0) const;
 
 	/**
+	* https://finnhub.io/docs/api/company-basic-financials
+	*/
+	nlohmann::json getStockBasicFinancials(const std::string& symbol, const std::string& metric = "all") const;
+
+	/**
 	* https://finnhub.io/docs/api/stock-candles
 	*/
 	nlohmann::json getStockCandles(const std::string& symbol, uint64_t from, uint64_t to, uint64_t resolution) const;
