@@ -107,14 +107,14 @@ public:
 	nlohmann::json getStockBasicFinancials(const std::string& symbol, const std::string& metric = "all") const;
 
 	/**
-	* https://finnhub.io/docs/api/stock-candles
-	*/
-	nlohmann::json getStockCandles(const std::string& symbol, uint64_t from, uint64_t to, uint64_t resolution) const;
-
-	/**
 	* https://finnhub.io/docs/api/quote
 	*/
 	nlohmann::json getQuotes(const std::string& symbol) const;
+
+	/**
+	* https://finnhub.io/docs/api/stock-candles
+	*/
+	nlohmann::json getStockCandles(const std::string& symbol, uint64_t from, uint64_t to, uint64_t resolution) const;
 
 
 };
@@ -127,7 +127,19 @@ Trades - Last Price Updates https://finnhub.io/docs/api/websocket-trades
 Symbol Lookup https://finnhub.io/docs/api/symbol-search -> done
 Company News https://finnhub.io/docs/api/company-news
 Company Peers https://finnhub.io/docs/api/company-peers
-Basic Financials https://finnhub.io/docs/api/company-basic-financials
+Basic Financials https://finnhub.io/docs/api/company-basic-financials -> done
+Insider Transactions https://finnhub.io/docs/api/insider-transactions
+Insider Sentiment https://finnhub.io/docs/api/insider-sentiment
+Financials As Reported https://finnhub.io/docs/api/financials-reported
+SEC Filings https://finnhub.io/docs/api/filings
+IPO Calendar https://finnhub.io/docs/api/ipo-calendar
+Earnings Surprises https://finnhub.io/docs/api/company-earnings
+Earnings Calendar https://finnhub.io/docs/api/earnings-calendar
+
+
+Crypto Candles https://finnhub.io/docs/api/crypto-candles
+Technical Indicators https://finnhub.io/docs/api/technical-indicator
+Social Sentiment https://finnhub.io/docs/api/social-sentiment
 
 
 What are the intervals allowed for candle stick query? use the query tp build continuous chart´...
