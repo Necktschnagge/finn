@@ -37,7 +37,7 @@ void init_logger(){
 	auto finnhub_client_logger = std::make_shared<spdlog::logger>(FINNHUB_CLIENT_LOGGER_NAME, sink_std_cout);
 
 	standard_logger->set_level(spdlog::level::trace);
-	finnhub_client_logger->set_level(spdlog::level::trace);
+	finnhub_client_logger->set_level(spdlog::level::debug);
 
 	spdlog::register_logger(standard_logger);
 	spdlog::register_logger(finnhub_client_logger);
