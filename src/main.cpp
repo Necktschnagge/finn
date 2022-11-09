@@ -8,13 +8,22 @@
 
 #include <iostream>
 #include <fstream>
+#include <chrono>
 
 namespace feature_toogle {
 
 	namespace sheep {
-		static constexpr bool FOLD_US_STOCK_CURRENCIES{ true };
+		static constexpr bool FOLD_US_STOCK_CURRENCIES{ false };
 		static constexpr bool TEST_API_LIMIT{ false };
 	}
+}
+
+namespace fnn {
+	static const std::string symbol{ "symbol" };
+	static const std::string Profile2{ "Profile2" };
+	static const std::string Basics{ "Basics" };
+
+
 }
 
 namespace playground {
@@ -38,7 +47,7 @@ namespace playground {
 		static const std::string BBBY{ "BBBY" };
 		static const std::string BBBY_Quotes{ "BBBY-Quote" };
 		static const std::string BBBY_Candles{ "BBBY-Candles" };
-		static const std::string BBBY_Profile2{"BBBY-Profile2" };
+		static const std::string BBBY_Profile2{ "BBBY-Profile2" };
 
 
 		static const std::string NVDA{ "NVDA" };
@@ -52,6 +61,12 @@ namespace playground {
 		static const std::string INTC_Quotes{ "INTC-Quote" };
 		static const std::string INTC_Candles{ "INTC-Candles" };
 		static const std::string INTC_Profile2{ "INTC-Profile2" };
+
+		static const std::string map_stocks_to_details{ "map_stocks_to_details" };
+		static const std::string finnhub_client_meta{ "finnhub_client_meta" };
+		static const std::string http_status_codes{ "http_status_codes" };
+		static const std::string original{ "original" };
+
 
 	}
 
@@ -79,7 +94,7 @@ int main()
 	}
 
 	// get all DE stock symbols... needs expensive purchase plan...
-	if (true) {
+	if (false) {
 		auto stock_list = finn.getStockSymbols(playground::DE);
 		summary[playground::sheep::stock_list_DE] = stock_list;
 		try_sort_stock_list(summary[playground::sheep::stock_list_DE]);
@@ -88,34 +103,34 @@ int main()
 	// get candles for...
 	if (true) {
 		summary[playground::sheep::NVDA_Candles] = finn.getStockCandles(playground::sheep::NVDA, 1656662061, 1664531661, 1);
-		summary[playground::sheep::INTC_Candles] = finn.getStockCandles(playground::sheep::INTC, 1656662061, 1664531661, 1);
+		//summary[playground::sheep::INTC_Candles] = finn.getStockCandles(playground::sheep::INTC, 1656662061, 1664531661, 1);
 		// TODO: list all possible resolutions!
 	}
 
 	// get current price, delta, open, previous close, day high, day low... of a single stock
 	if (true) {
 		summary[playground::sheep::NVDA_Quotes] = finn.getQuotes(playground::sheep::NVDA);
-		summary[playground::sheep::INTC_Quotes] = finn.getQuotes(playground::sheep::INTC);
-		summary[playground::sheep::BBBY_Quotes] = finn.getQuotes(playground::sheep::BBBY);
+		//summary[playground::sheep::INTC_Quotes] = finn.getQuotes(playground::sheep::INTC);
+		//summary[playground::sheep::BBBY_Quotes] = finn.getQuotes(playground::sheep::BBBY);
 	}
 
 	// get company profile...
 	if (true) {
 		summary[playground::sheep::NVDA_Profile2] = finn.getCompanyProfile2(playground::sheep::NVDA);
-		summary[playground::sheep::INTC_Profile2] = finn.getCompanyProfile2(playground::sheep::INTC);
-		summary[playground::sheep::BBBY_Profile2] = finn.getCompanyProfile2(playground::sheep::BBBY);
+		//summary[playground::sheep::INTC_Profile2] = finn.getCompanyProfile2(playground::sheep::INTC);
+		//summary[playground::sheep::BBBY_Profile2] = finn.getCompanyProfile2(playground::sheep::BBBY);
 
 
 		summary[playground::sheep::NVDA_Basics] = finn.getStockBasicFinancials(playground::sheep::NVDA);
 	}
 
 	// search for a share using ISIN
-	if (true) {
+	if (false) {
 		summary[playground::sheep::AMD] = finn.getSymbolLookup(playground::sheep::AMD_ISIN);
 	}
 
 	// get general market news
-	if (true) {
+	if (false) {
 		summary[playground::sheep::News] = finn.getNews(finnhub_rest_client::market_news_category::values::general);
 	}
 
@@ -134,7 +149,74 @@ int main()
 		}
 	}
 
+	/*
+
+	ideas for filtering shares:
+
+	Profile2
+		market cap: marketCapitalization in Mio USD
+		number of distributed shares: shareOutstanding (unit: Mio Shares)
+		ipo date:
+
+	Basics
+		metric:
+			10DayAverageTradingVolume: (10 day average number of shares traded per day, unit: Mio. Shares)
+
+	*/
+
+	//nlohmann::json selected_shares = nlohmann::json::array();
+
+	// Profile2 for each share
+	if (true) {
+		std::size_t count_shares{ summary[playground::sheep::stock_list_US].size() };
+		standard_logger()->info("Number of shares:");
+		standard_logger()->info(count_shares);
+		standard_logger()->info("Minutes needed:");
+		standard_logger()->info(count_shares / 60);
+
+		std::for_each(
+			summary[playground::sheep::stock_list_US].cbegin(),
+			summary[playground::sheep::stock_list_US].cend(),
+			//std::next(summary[playground::sheep::stock_list_US].cbegin(), 40),
+			[&finn, &summary](const nlohmann::json& item) {
+				std::string sym{ item[fnn::symbol] };
+				uint64_t s1 = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+				summary[playground::sheep::map_stocks_to_details][sym][fnn::Profile2][std::to_string(s1)] = finn.getCompanyProfile2(sym);
+				uint64_t s2 = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+				summary[playground::sheep::map_stocks_to_details][sym][fnn::Basics][std::to_string(s2)] = finn.getStockBasicFinancials(sym);
+			});
+
+		try {
+			const auto& original_status_codes{ finn.export_meta_status_codes() };
+			std::map<uint16_t, uint64_t> count_codes;
+			for (auto iter = original_status_codes.cbegin(); iter != original_status_codes.cend(); ++iter) {
+				++count_codes[*iter];
+			}
+
+			summary[playground::sheep::finnhub_client_meta][playground::sheep::http_status_codes][playground::sheep::original] = original_status_codes;
+			for (const auto& pair : count_codes) {
+				summary[playground::sheep::finnhub_client_meta][playground::sheep::http_status_codes][std::to_string(pair.first)] = pair.second;
+			}
+		}
+		catch (const std::runtime_error& e)
+		{
+			standard_logger()->error("Cannot export response code meta data:");
+			standard_logger()->error(e.what());
+		}
+	}
+
+
 	//save json
 	save_json(playground::json_file_name, summary);
 	return 0;
 }
+
+
+
+
+
+#if false
+
+summary[playground::sheep::map_stocks_to_details];
+std::back_inserter(selected_shares),
+#endif
