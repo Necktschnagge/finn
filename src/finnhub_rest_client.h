@@ -6,6 +6,15 @@
 
 #include <chrono>
 #include <string>
+#include <vector>
+
+class finn_meta_data {
+	friend class finnhub_rest_client;
+
+	bool enable_response_codes{ true };
+
+	std::vector<uint16_t> response_codes;
+};
 
 class finnhub_rest_client final {
 public:
@@ -48,6 +57,7 @@ public:
 
 private:
 	std::string api_key;
+	std::unique_ptr<finn_meta_data> meta_data;
 
 	inline static nlohmann::json try_parse_api_response(const std::string& text, const cpr::Url& url) {
 		try {
@@ -65,20 +75,53 @@ private:
 		cpr::Header header{ { "X-Finnhub-Token", api_key } };
 		//params.Add({ "token", api_key }); <-- You can use this instead of passing the api_key inside the header.
 		finnhub_client_logger()->trace(std::string("url:   ").append(url.c_str()));
+		//finnhub_client_logger()->trace(std::string("parameters:   ").append(params.);
 	ensured_finnhub_api_request__again_request:
 		cpr::Response r = cpr::Get(url, header, params);
+		if (meta_data && meta_data->enable_response_codes) {
+			meta_data->response_codes.push_back(static_cast<uint16_t>(r.status_code));
+		}
 		finnhub_client_logger()->trace(std::string("response status code:   ").append(std::to_string(r.status_code)));
+		finnhub_client_logger()->trace(std::string("response content type:   ").append(r.header["content-type"]));
 		if (r.status_code == 429) {
-			finnhub_client_logger()->debug("Encountered api limit exceed.Trying again...");
+			finnhub_client_logger()->debug("Encountered api limit exceed (HTTP 429).Trying again...");
 			std::this_thread::sleep_for(2s);
 			goto ensured_finnhub_api_request__again_request;
 		}
-		finnhub_client_logger()->trace(std::string("response content type:   ").append(r.header["content-type"]));
+		if (r.status_code == 0) {
+			finnhub_client_logger()->debug("Encountered server host not found (HTTP 0).Trying again...");
+			std::this_thread::sleep_for(100ms);
+			goto ensured_finnhub_api_request__again_request;
+		}
+		if (r.status_code == 502) {
+			finnhub_client_logger()->debug("Encountered bad gateway (HTTP 502).Trying again...");
+			std::this_thread::sleep_for(100ms);
+			goto ensured_finnhub_api_request__again_request;
+		}
+		if (r.status_code != 200) {
+			finnhub_client_logger()->error("Encountered HTTP status code without specific handler.Trying again...");
+			finnhub_client_logger()->error(std::string("response status code:   ").append(std::to_string(r.status_code)));
+			finnhub_client_logger()->error(std::string("response content type:   ").append(r.header["content-type"]));
+		}
 		return try_parse_api_response(r.text, url);
 	}
 
 public:
-	finnhub_rest_client(const std::string& api_key) : api_key(api_key) {}
+	finnhub_rest_client(const std::string& api_key) : api_key(api_key) {
+		meta_data = std::make_unique<finn_meta_data>();
+	}
+
+	const std::vector<uint16_t>& export_meta_status_codes() const {
+		if (!meta_data)
+			throw std::runtime_error("meta disabled");
+		return meta_data->response_codes;
+	}
+
+	nlohmann::json export_meta_status_codes_json() const {
+		if (!meta_data)
+			return nlohmann::json::array();
+		return nlohmann::json(meta_data->response_codes);
+	}
 
 	/**
 	* https://finnhub.io/docs/api/symbol-search
