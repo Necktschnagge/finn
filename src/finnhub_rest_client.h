@@ -102,6 +102,8 @@ private:
 			finnhub_client_logger()->error("Encountered HTTP status code without specific handler.Trying again...");
 			finnhub_client_logger()->error(std::string("response status code:   ").append(std::to_string(r.status_code)));
 			finnhub_client_logger()->error(std::string("response content type:   ").append(r.header["content-type"]));
+			std::this_thread::sleep_for(3000ms);
+			goto ensured_finnhub_api_request__again_request;
 		}
 		return try_parse_api_response(r.text, url);
 	}

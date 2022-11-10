@@ -33,10 +33,10 @@ inline nlohmann::json load_json(const std::string& file_name, const nlohmann::js
 	return default_json;
 }
 
-inline void save_json(const std::string& file_name, const nlohmann::json& json, int indent = 3) {
+inline void save_json(const std::string& file_name, const nlohmann::json& json, int indent = 1) {
 	std::ofstream file;
 	file.open(file_name);
-	file << json.dump(indent);
+	file << std::setw(indent) << json << std::endl;
 }
 
 inline void try_sort_stock_list(nlohmann::json& stock_list) {
