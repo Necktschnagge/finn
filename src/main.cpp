@@ -15,6 +15,7 @@ namespace feature_toogle {
 	namespace sheep {
 		static constexpr bool FOLD_US_STOCK_CURRENCIES{ false };
 		static constexpr bool TEST_API_LIMIT{ false };
+		static bool GET_ALL_SHARES_DETAILS{ true };
 	}
 }
 
@@ -77,9 +78,15 @@ namespace playground {
 }
 
 
-int main()
+int main(int argc, char* argv[])
 {
 	init_logger();
+
+	if (argc > 1) {
+		//on server
+		feature_toogle::sheep::GET_ALL_SHARES_DETAILS = false;
+		(void)argv;
+	}
 
 	auto finn{ finnhub_rest_client(secret_token.data()) };
 
@@ -167,7 +174,7 @@ int main()
 	//nlohmann::json selected_shares = nlohmann::json::array();
 
 	// Profile2 for each share
-	if (true) {
+	if (feature_toogle::sheep::GET_ALL_SHARES_DETAILS) {
 		std::size_t count_shares{ summary[playground::sheep::stock_list_US].size() };
 		standard_logger()->info("Number of shares:");
 		standard_logger()->info(count_shares);
