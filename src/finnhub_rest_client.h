@@ -72,11 +72,17 @@ private:
 
 	inline nlohmann::json ensured_finnhub_api_request(const cpr::Url& url, cpr::Parameters& params) const {
 		using namespace std::chrono_literals;
+		uint8_t max_repeat{ 100 };
 		cpr::Header header{ { "X-Finnhub-Token", api_key } };
 		//params.Add({ "token", api_key }); <-- You can use this instead of passing the api_key inside the header.
 		finnhub_client_logger()->trace(std::string("url:   ").append(url.c_str()));
 		//finnhub_client_logger()->trace(std::string("parameters:   ").append(params.);
 	ensured_finnhub_api_request__again_request:
+		--max_repeat;
+		if (!max_repeat) {
+			nlohmann::json error_message = { {"error", "Critical: After MAX_TRIES it was not possible to get a 200 server answer."} };
+			return try_parse_api_response(error_message.dump(1), url);
+		}
 		cpr::Response r = cpr::Get(url, header, params);
 		if (meta_data && meta_data->enable_response_codes) {
 			meta_data->response_codes.push_back(static_cast<uint16_t>(r.status_code));
