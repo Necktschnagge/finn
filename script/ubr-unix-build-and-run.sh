@@ -1,7 +1,6 @@
 #!/bin/bash
 
-# TODO: check working directory is script/
-
+if [ ! "${PWD##*/}" = script ]; then exit 1; fi
 file="summary.json"
 
 if [ -f "$file" ]; then rm -v "$file"; else echo "File "$file" did not exist."; fi
