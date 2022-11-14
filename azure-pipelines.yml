@@ -65,7 +65,7 @@ stages:
          condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
 
 
-   - job: runtime_check
+    - job: runtime_check
 
       dependsOn: compile
 
