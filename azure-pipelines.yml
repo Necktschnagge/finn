@@ -60,6 +60,39 @@ stages:
        - script: ./build/test/TEST-$(project_name)
          displayName: "Run Tests on Linux / Mac OS"
          condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
+       - script: .\build\Debug\TEST-$(project_name).exe
+         displayName: "Run Tests on Windows"
+         condition: and(succeeded(), eq( variables['Agent.OS'], 'Windows_NT' ))
+
+
+   - job: runtime_check
+
+      dependsOn: compile
+
+      strategy:
+        matrix:
+
+          ubuntu_22_04:
+            imageName: 'ubuntu-22.04'
+            the_name: 'Azure Pipelines'
+
+      pool:
+        vmImage: $(imageName)
+        name: $(the_name)
+
+      steps:
+       - script: git submodule update --init --recursive
+         displayName: "Init Git Submodules"
+         condition: succeeded()
+       - script: cmake -S . -B ./build/
+         displayName: "CMake: Create Project"
+         condition: succeeded()
+       - script: cmake --build ./build
+         displayName: "CMake: Compile and Link"
+         condition: succeeded()
+       - script: ./build/test/TEST-$(project_name)
+         displayName: "Run Tests on Linux / Mac OS"
+         condition: and(succeeded(), ne( variables['Agent.OS'], 'Windows_NT'))
        - script: ./build/src/$(project_name) --run_on_server
          displayName: "Runtime Check on Linux"
          condition: and(succeeded(), eq( variables['Agent.OS'], 'Linux'))
