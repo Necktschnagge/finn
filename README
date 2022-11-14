@@ -31,7 +31,7 @@ $ ./ur-unix-run.sh
 
 * Log files
 
-After you have  made changes to main.cpp you can build and run the project easyly ...
+After you have made changes to main.cpp you can build and run the project easyly ...
 $ ./ubr-unix-build-and-run.sh
 
 You can watch the building process on a second console ...
@@ -43,3 +43,4 @@ $ cat ur-unix-run.log
 * Result
 
 According to your changes in 'main.cpp' there should have been created a JSON file named 'summary.json'
+
