@@ -1,0 +1,45 @@
+README
+
+* Installation steps:
+
+1) Clone ...
+$ git clone https://github.com/Necktschnagge/finn.git
+
+2) Install submodules ...
+$ cd finn
+$ git submodule init
+$ git submodule update --recursive
+# $ git checkout <branch>
+
+* Setup project ...
+
+3) Set secret_token in secrets.h
+$ nano src/secrets.h
+
+4) Edit main.cpp to your needs
+$ nano src/main.cpp
+
+5) Create and build project ...
+$ cd script
+$ cmake -S .. -B ../build/
+$ cmake --build ../build
+
+* Run project ...
+
+6) Run script ...
+$ ./ur-unix-run.sh
+
+* Log files
+
+After you have  made changes to main.cpp you can build and run the project easyly ...
+$ ./ubr-unix-build-and-run.sh
+
+You can watch the building process on a second console ...
+$ tail -f ucbp-unix-create-build-project.log
+
+You can print the output of 'Finn' to standard output ...
+$ cat ur-unix-run.log
+
+* Result
+
+According to your changes in 'main.cpp' there should have been created a JSON file named 'summary.json'
