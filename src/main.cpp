@@ -1,13 +1,12 @@
 #include "logger.h"
 
-#include "utility.h"
 #include "secrets.h"
+
+#include "utility.h"
 #include "finnhub_rest_client.h"
 
 #include <nlohmann/json.hpp>
 
-#include <fstream>
-#include <chrono>
 
 namespace feature_toogle {
 
