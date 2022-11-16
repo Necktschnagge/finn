@@ -15,7 +15,7 @@ namespace feature_toogle {
 	namespace sheep {
 		static constexpr bool FOLD_US_STOCK_CURRENCIES{ false };
 		static constexpr bool TEST_API_LIMIT{ false };
-		static bool GET_ALL_SHARES_DETAILS{ true };
+		static bool GET_ALL_SHARES_DETAILS{ false };
 	}
 }
 
@@ -214,7 +214,7 @@ int main(int argc, char* argv[])
 
 
 	//save json
-	save_json(playground::json_file_name, summary);
+	//save_json(playground::json_file_name, summary);
 	return 0;
 }
 
