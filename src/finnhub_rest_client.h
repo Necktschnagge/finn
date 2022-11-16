@@ -51,7 +51,8 @@ public:
 			case values::merger:
 				return "merger";
 			}
-			throw std::runtime_error("market_news_category does not know an enum class value.");
+			return market_news_category(values::general);
+			//throw std::runtime_error("market_news_category does not know an enum class value.");
 		}
 	};
 
@@ -140,7 +141,7 @@ public:
 	/**
 	* https://finnhub.io/docs/api/stock-symbols
 	*/
-	nlohmann::json getStockSymbols(const std::string& exchange = "US") const;
+	nlohmann::json getStockSymbol(const std::string& exchange = "US") const;
 
 	/**
 	* https://finnhub.io/docs/api/company-profile2
@@ -155,12 +156,12 @@ public:
 	/**
 	* https://finnhub.io/docs/api/company-basic-financials
 	*/
-	nlohmann::json getStockBasicFinancials(const std::string& symbol, const std::string& metric = "all") const;
+	nlohmann::json getBasicFinancials(const std::string& symbol, const std::string& metric = "all") const;
 
 	/**
 	* https://finnhub.io/docs/api/quote
 	*/
-	nlohmann::json getQuotes(const std::string& symbol) const;
+	nlohmann::json getQuote(const std::string& symbol) const;
 
 	/**
 	* https://finnhub.io/docs/api/stock-candles

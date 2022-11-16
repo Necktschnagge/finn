@@ -95,14 +95,14 @@ int main(int argc, char* argv[])
 
 	// get all US stock symbols...
 	if (true) {
-		auto stock_list = finn.getStockSymbols(playground::US);
+		auto stock_list = finn.getStockSymbol(playground::US);
 		summary[playground::sheep::stock_list_US] = stock_list;
 		try_sort_stock_list(summary[playground::sheep::stock_list_US]);
 	}
 
 	// get all DE stock symbols... needs expensive purchase plan...
 	if (false) {
-		auto stock_list = finn.getStockSymbols(playground::DE);
+		auto stock_list = finn.getStockSymbol(playground::DE);
 		summary[playground::sheep::stock_list_DE] = stock_list;
 		try_sort_stock_list(summary[playground::sheep::stock_list_DE]);
 	}
@@ -116,9 +116,9 @@ int main(int argc, char* argv[])
 
 	// get current price, delta, open, previous close, day high, day low... of a single stock
 	if (true) {
-		summary[playground::sheep::NVDA_Quotes] = finn.getQuotes(playground::sheep::NVDA);
-		//summary[playground::sheep::INTC_Quotes] = finn.getQuotes(playground::sheep::INTC);
-		//summary[playground::sheep::BBBY_Quotes] = finn.getQuotes(playground::sheep::BBBY);
+		summary[playground::sheep::NVDA_Quotes] = finn.getQuote(playground::sheep::NVDA);
+		//summary[playground::sheep::INTC_Quotes] = finn.getQuote(playground::sheep::INTC);
+		//summary[playground::sheep::BBBY_Quotes] = finn.getQuote(playground::sheep::BBBY);
 	}
 
 	// get company profile...
@@ -128,7 +128,7 @@ int main(int argc, char* argv[])
 		//summary[playground::sheep::BBBY_Profile2] = finn.getCompanyProfile2(playground::sheep::BBBY);
 
 
-		summary[playground::sheep::NVDA_Basics] = finn.getStockBasicFinancials(playground::sheep::NVDA);
+		summary[playground::sheep::NVDA_Basics] = finn.getBasicFinancials(playground::sheep::NVDA);
 	}
 
 	// search for a share using ISIN
@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
 		using namespace std::chrono_literals;
 		for (int x = 0; x < 70; ++x) {
 
-			nlohmann::json test = finn.getQuotes(playground::sheep::NVDA);
+			nlohmann::json test = finn.getQuote(playground::sheep::NVDA);
 			std::this_thread::sleep_for(200ms);
 		}
 	}
@@ -190,7 +190,7 @@ int main(int argc, char* argv[])
 				uint64_t s1 = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
 				summary[playground::sheep::map_stocks_to_details][sym][fnn::Profile2][std::to_string(s1)] = finn.getCompanyProfile2(sym);
 				uint64_t s2 = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
-				summary[playground::sheep::map_stocks_to_details][sym][fnn::Basics][std::to_string(s2)] = finn.getStockBasicFinancials(sym);
+				summary[playground::sheep::map_stocks_to_details][sym][fnn::Basics][std::to_string(s2)] = finn.getBasicFinancials(sym);
 			});
 
 		try {

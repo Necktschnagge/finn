@@ -11,7 +11,7 @@ nlohmann::json finnhub_rest_client::getSymbolLookup(const std::string& query_str
 	return ensured_finnhub_api_request(url, params);
 }
 
-nlohmann::json finnhub_rest_client::getStockSymbols(const std::string& exchange) const {
+nlohmann::json finnhub_rest_client::getStockSymbol(const std::string& exchange) const {
 	finnhub_client_logger()->debug(std::string("Getting stock symbols...   [").append(exchange).append("]"));
 	const auto url{ cpr::Url{ "https://finnhub.io/api/v1/stock/symbol" } };
 	auto params{
@@ -46,7 +46,7 @@ nlohmann::json finnhub_rest_client::getNews(const market_news_category& category
 	return ensured_finnhub_api_request(url, params);
 }
 
-nlohmann::json finnhub_rest_client::getStockBasicFinancials(const std::string& symbol, const std::string& metric) const
+nlohmann::json finnhub_rest_client::getBasicFinancials(const std::string& symbol, const std::string& metric) const
 {
 	finnhub_client_logger()->debug(std::string("Getting stock basic financials...   [").append(symbol).append("]"));
 	const auto url{ cpr::Url{ "https://finnhub.io/api/v1/stock/metric" } };
@@ -60,7 +60,7 @@ nlohmann::json finnhub_rest_client::getStockBasicFinancials(const std::string& s
 	return ensured_finnhub_api_request(url, params);
 }
 
-nlohmann::json finnhub_rest_client::getQuotes(const std::string& symbol) const {
+nlohmann::json finnhub_rest_client::getQuote(const std::string& symbol) const {
 	finnhub_client_logger()->debug(std::string("Getting quotes...   [").append(symbol).append("]"));
 	const auto url{ cpr::Url{ "https://finnhub.io/api/v1/quote" } };
 	auto params{
