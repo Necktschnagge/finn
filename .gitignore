@@ -393,6 +393,6 @@ MigrationBackup/
 summary.json
 
 # secrets.h containing secret_token
-src/secrets.h
+#src/secrets.h
 
 # End of https://www.gitignore.io/api/c++,visualstudio
