@@ -386,4 +386,13 @@ healthchecksdb
 # Backup folder for Package Reference Convert tool in Visual Studio 2017
 MigrationBackup/
 
+# Visual Studio Code settings
+.vscode/
+
+# Result JSON file
+summary.json
+
+# secrets.h containing secret_token
+#src/secrets.h
+
 # End of https://www.gitignore.io/api/c++,visualstudio
