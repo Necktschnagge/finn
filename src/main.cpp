@@ -1,12 +1,14 @@
 #include "logger.h"
 
-#include "secrets.h"
-
 #include "utility.h"
+#include "secrets.h"
 #include "finnhub_rest_client.h"
 
 #include <nlohmann/json.hpp>
 
+#include <iostream>
+#include <fstream>
+#include <chrono>
 
 namespace feature_toogle {
 
@@ -60,11 +62,37 @@ namespace playground {
 		static const std::string INTC_Quotes{ "INTC-Quote" };
 		static const std::string INTC_Candles{ "INTC-Candles" };
 		static const std::string INTC_Profile2{ "INTC-Profile2" };
+
+		static const std::string map_stocks_to_details{ "map_stocks_to_details" };
+		static const std::string finnhub_client_meta{ "finnhub_client_meta" };
+		static const std::string http_status_codes{ "http_status_codes" };
+		static const std::string original{ "original" };
+
+
+	}
+
+	namespace rooster {
+
 	}
 
 }
 
-void finnhub_example_api_requests(finnhub_rest_client& finn, nlohmann::json& summary) {
+
+int main(int argc, char* argv[])
+{
+	init_logger();
+
+	if (argc > 1) {
+		//on server
+		feature_toogle::sheep::GET_ALL_SHARES_DETAILS = false;
+		(void)argv;
+	}
+
+	auto finn{ finnhub_rest_client(secret_token.data()) };
+
+	// load previous json...
+	nlohmann::json summary = load_json(playground::json_file_name);
+
 	// get all US stock symbols...
 	if (true) {
 		auto stock_list = finn.getStockSymbol(playground::US);
@@ -104,12 +132,12 @@ void finnhub_example_api_requests(finnhub_rest_client& finn, nlohmann::json& sum
 	}
 
 	// search for a share using ISIN
-	if (true) {
+	if (false) {
 		summary[playground::sheep::AMD] = finn.getSymbolLookup(playground::sheep::AMD_ISIN);
 	}
 
 	// get general market news
-	if (true) {
+	if (false) {
 		summary[playground::sheep::News] = finn.getNews(finnhub_rest_client::market_news_category::values::general);
 	}
 
@@ -128,28 +156,74 @@ void finnhub_example_api_requests(finnhub_rest_client& finn, nlohmann::json& sum
 		}
 	}
 
+	/*
 
-}
+	ideas for filtering shares:
 
+	Profile2
+		market cap: marketCapitalization in Mio USD
+		number of distributed shares: shareOutstanding (unit: Mio Shares)
+		ipo date:
 
-int main(int argc, char* argv[])
-{
-	init_logger();
+	Basics
+		metric:
+			10DayAverageTradingVolume: (10 day average number of shares traded per day, unit: Mio. Shares)
 
-	if (argc > 1) {
-		//on server
-		feature_toogle::sheep::GET_ALL_SHARES_DETAILS = false;
-		(void)argv;
+	*/
+
+	//nlohmann::json selected_shares = nlohmann::json::array();
+
+	// Profile2 for each share
+	if (feature_toogle::sheep::GET_ALL_SHARES_DETAILS) {
+		std::size_t count_shares{ summary[playground::sheep::stock_list_US].size() };
+		standard_logger()->info("Number of shares:");
+		standard_logger()->info(count_shares);
+		standard_logger()->info("Minutes needed:");
+		standard_logger()->info(count_shares / 60);
+
+		std::for_each(
+			summary[playground::sheep::stock_list_US].cbegin(),
+			summary[playground::sheep::stock_list_US].cend(),
+			//std::next(summary[playground::sheep::stock_list_US].cbegin(), 40),
+			[&finn, &summary](const nlohmann::json& item) {
+				std::string sym{ item[fnn::symbol] };
+				uint64_t s1 = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+				summary[playground::sheep::map_stocks_to_details][sym][fnn::Profile2][std::to_string(s1)] = finn.getCompanyProfile2(sym);
+				uint64_t s2 = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+				summary[playground::sheep::map_stocks_to_details][sym][fnn::Basics][std::to_string(s2)] = finn.getBasicFinancials(sym);
+			});
+
+		try {
+			const auto& original_status_codes{ finn.export_meta_status_codes() };
+			std::map<uint16_t, uint64_t> count_codes;
+			for (auto iter = original_status_codes.cbegin(); iter != original_status_codes.cend(); ++iter) {
+				++count_codes[*iter];
+			}
+
+			summary[playground::sheep::finnhub_client_meta][playground::sheep::http_status_codes][playground::sheep::original] = original_status_codes;
+			for (const auto& pair : count_codes) {
+				summary[playground::sheep::finnhub_client_meta][playground::sheep::http_status_codes][std::to_string(pair.first)] = pair.second;
+			}
+		}
+		catch (const std::runtime_error& e)
+		{
+			standard_logger()->error("Cannot export response code meta data:");
+			standard_logger()->error(e.what());
+		}
 	}
 
-	auto finn{ finnhub_rest_client(secret_token.data()) };
-
-	// load previous json...
-	nlohmann::json summary = load_json(playground::json_file_name);
-
-	finnhub_example_api_requests(finn, summary);
 
 	//save json
-	save_json(playground::json_file_name, summary);
+	//save_json(playground::json_file_name, summary);
 	return 0;
 }
+
+
+
+
+
+#if false
+
+summary[playground::sheep::map_stocks_to_details];
+std::back_inserter(selected_shares),
+#endif
