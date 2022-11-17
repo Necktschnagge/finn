@@ -78,6 +78,34 @@ namespace playground {
 }
 
 
+void split_big_json_and_save() {
+	// load previous json...
+	standard_logger()->info("start parsing json");
+	nlohmann::json summary = load_json(playground::json_file_name);
+	standard_logger()->info("stop parsing json");
+
+	std::array<nlohmann::json, 26> splitted;
+
+	std::for_each(
+		summary[playground::sheep::stock_list_US].cbegin(),
+		summary[playground::sheep::stock_list_US].cend(),
+		[&splitted, &summary](const nlohmann::json& item) {
+			std::string sym{ item[fnn::symbol] };
+			std::string first_letter = sym.substr(0, 1);
+			if (first_letter.empty()) first_letter = "A";
+			first_letter[0] = std::toupper(first_letter[0], std::locale());
+			uint8_t index = (first_letter[0] - 'A');
+			index = index > 25 ? 0 : index;
+			splitted[index][sym] = summary[playground::sheep::map_stocks_to_details][sym];
+		});
+
+	for (uint8_t i = 0; i < 26; ++i) {
+		std::string name{ std::to_string('A' + i) + ".json" };
+		save_json(name, splitted[i]);
+	}
+}
+
+
 int main(int argc, char* argv[])
 {
 	init_logger();
@@ -90,8 +118,30 @@ int main(int argc, char* argv[])
 
 	auto finn{ finnhub_rest_client(secret_token.data()) };
 
-	// load previous json...
-	nlohmann::json summary = load_json(playground::json_file_name);
+	//split_big_json_and_save();
+
+
+	standard_logger()->info("start parsing jsons");
+	std::array<nlohmann::json, 26> splitted;
+	std::array<std::thread, 26> the_pool;
+	for (uint8_t i = 0; i < 26; ++i) {
+		std::string name{ std::to_string('A' + i) + ".json" };
+		the_pool[i] = std::thread(
+			[&splitted](std::string name, uint8_t i) {
+				splitted[i] = load_json(name);
+			},
+			name,
+			i
+		);
+		
+	}
+	for (uint8_t i = 0; i < 26; ++i) {
+		the_pool[i].join();
+	}
+	standard_logger()->info("stop parsing jsons");
+	standard_logger()->info("stop");
+
+#if false
 
 	// get all US stock symbols...
 	if (true) {
@@ -216,6 +266,7 @@ int main(int argc, char* argv[])
 	//save json
 	//save_json(playground::json_file_name, summary);
 	return 0;
+#endif
 }
 
 
