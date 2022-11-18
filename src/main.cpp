@@ -77,8 +77,32 @@ namespace playground {
 
 }
 
+namespace fsl {
 
-void split_big_json_and_save() {
+	//class 
+
+	template<class T, T... properties>
+	class attributed_json_view {
+	public:
+		nlohmann::json& json;
+
+		class strategy {
+
+		};
+
+		strategy check;
+
+		attributed_json_view(nlohmann::json& json, const strategy& s = check) : json(json) {
+			// check properties
+
+		}
+
+	};
+
+}
+
+
+[[deprecated]] void split_big_json_and_save1() {
 	// load previous json...
 	standard_logger()->info("start parsing json");
 	nlohmann::json summary = load_json(playground::json_file_name);
@@ -105,6 +129,34 @@ void split_big_json_and_save() {
 	}
 }
 
+void split_big_json_and_save(const std::size_t& SPLITTING_FACTOR) {
+
+	// load previous json...
+	standard_logger()->info("start parsing json");
+	nlohmann::json summary = load_json(playground::json_file_name);
+	standard_logger()->info("start splitting json");
+
+	auto splitted{ std::vector<nlohmann::json>(SPLITTING_FACTOR) };
+
+	const std::size_t SOCK_LIST_SIZE{ summary[playground::sheep::stock_list_US].size() };
+
+	std::size_t i{ 0 };
+	for (auto iter = summary[playground::sheep::stock_list_US].cbegin();
+		iter != summary[playground::sheep::stock_list_US].cend();
+		++iter, ++i) {
+		std::string sym{ (*iter)[fnn::symbol] };
+		const std::size_t index{ i * SPLITTING_FACTOR / SOCK_LIST_SIZE };
+
+		splitted[index][sym] = summary[playground::sheep::map_stocks_to_details][sym];
+	}
+
+	standard_logger()->info("start saving splitted jsons");
+	for (uint8_t j = 0; j < SPLITTING_FACTOR; ++j) {
+		std::string name{ std::string("share-details-") + std::to_string(j) + ".json" };
+		save_json(name, splitted[j]);
+	}
+}
+
 
 int main(int argc, char* argv[])
 {
@@ -118,28 +170,67 @@ int main(int argc, char* argv[])
 
 	auto finn{ finnhub_rest_client(secret_token.data()) };
 
+	constexpr std::size_t SPLITTING_FACTOR{ 16 };
+
 	//split_big_json_and_save();
+	//split_big_json_and_save(SPLITTING_FACTOR);
 
 
-	standard_logger()->info("start parsing jsons");
-	std::array<nlohmann::json, 26> splitted;
-	std::array<std::thread, 26> the_pool;
-	for (uint8_t i = 0; i < 26; ++i) {
-		std::string name{ std::to_string('A' + i) + ".json" };
+	standard_logger()->info("start parsing splitted jsons");
+	std::array<nlohmann::json, SPLITTING_FACTOR> splitted;
+	std::array<std::thread, SPLITTING_FACTOR> the_pool;
+	for (uint8_t i = 0; i < SPLITTING_FACTOR; ++i) {
+		std::string name{ std::string("share-details-") + std::to_string(i) + ".json" };
 		the_pool[i] = std::thread(
 			[&splitted](std::string name, uint8_t i) {
 				splitted[i] = load_json(name);
 			},
 			name,
-			i
-		);
-		
+				i
+				);
+
 	}
-	for (uint8_t i = 0; i < 26; ++i) {
-		the_pool[i].join();
+	for (auto& t : the_pool) {
+		t.join();
 	}
-	standard_logger()->info("stop parsing jsons");
+	standard_logger()->info("ready parsing splitted jsons");
+	/*
+	standard_logger()->info("start joining splitted jsons");
+	for (uint8_t i = 1; i < SPLITTING_FACTOR; ++i) {
+		splitted[0].update(splitted[i]);
+	}
+	standard_logger()->info("ready joining splitted jsons");
+	*/
+	const auto hasAnyTimeStampKey{ // requires isObject (?)
+		[](const nlohmann::json& j) {
+			for (auto iter = j.cbegin(); iter != j.cend(); ++iter) {
+				try {
+					uint64_t converted = std::stoull(iter.key());
+					if (j.find(std::to_string(converted)) != j.cend()) {
+						return true;
+					}
+				}
+				catch (...) {} // ignore exceptions thrown by std::stoull, .key()
+			}
+		return false;
+		}
+	};
+
+
+	for (uint8_t i = 0; i < SPLITTING_FACTOR; ++i) {
+		for (auto iter = splitted[i].cbegin(); iter != splitted[i].cend(); ++iter) {
+			if (!hasAnyTimeStampKey(iter.value()[fnn::Basics]) || !hasAnyTimeStampKey(iter.value()[fnn::Profile2])) {
+				standard_logger()->error("unexpected json value");
+			}
+		}
+
+	}
+
+
+
 	standard_logger()->info("stop");
+
+
 
 #if false
 
@@ -260,7 +351,7 @@ int main(int argc, char* argv[])
 			standard_logger()->error("Cannot export response code meta data:");
 			standard_logger()->error(e.what());
 		}
-	}
+}
 
 
 	//save json
