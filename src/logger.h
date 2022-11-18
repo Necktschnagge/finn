@@ -3,6 +3,7 @@
 
 std::shared_ptr<spdlog::logger> standard_logger();
 std::shared_ptr<spdlog::logger> finnhub_client_logger();
+std::shared_ptr<spdlog::logger> utility_logger();
 
 /*!
 	When to use which logging level:
