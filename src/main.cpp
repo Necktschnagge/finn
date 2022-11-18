@@ -79,9 +79,32 @@ namespace playground {
 
 namespace fsl {
 
-	//class 
+	class isJsonObject {
+		template<class JsonView>
+		static bool check(const JsonView& json) noexcept {
+			return json.underlying.is_object();
+		}
+	};
 
-	template<class T, T... properties>
+	class isJsonArray {
+		template<class JsonView>
+		static bool check(const JsonView& json) noexcept {
+			return json.underlying.is_array();
+		}
+	};
+
+	template<std::string_view* key>
+	class hasObjectProperty {
+		template<class JsonView>
+		static bool check(const JsonView& json) noexcept {
+			json.check<isJsonObject>(); // check dependencies
+			// check already required dependent properties.
+			// check the actual property
+			return true;
+		}
+	};
+
+	template<class ... Properties>
 	class attributed_json_view {
 	public:
 		nlohmann::json& json;
@@ -93,7 +116,7 @@ namespace fsl {
 		strategy check;
 
 		attributed_json_view(nlohmann::json& json, const strategy& s = check) : json(json) {
-			// check properties
+			//Properties...::check();
 
 		}
 
