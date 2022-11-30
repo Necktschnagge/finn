@@ -8,10 +8,6 @@
 
 #include <fstream>
 
-namespace {
-	auto& utility_logger = standard_logger;
-}
-
 inline nlohmann::json load_json(const std::string& file_name, const nlohmann::json& default_json = nlohmann::json::object()) {
 	std::ifstream ofile;
 	utility_logger()->debug("Try to open a file...");
