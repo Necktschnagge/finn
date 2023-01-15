@@ -7,6 +7,15 @@
 
 #include <nlohmann/json.hpp>
 
+#include <sstream>
+#include <iomanip>
+
+template <class T>
+std::string sized_to_string(const T& value, const std::streamsize& width) {
+	std::stringstream ss;
+	ss << std::setw(width) << std::setfill('0') << value;
+	return ss.str();
+}
 
 namespace feature_toogle {
 
@@ -80,6 +89,13 @@ public:
 	uint64_t time;
 };
 
+class bordered_candle {
+public:
+	candle c;
+	uint64_t first_time;
+	uint64_t last_time;
+};
+
 void finnhub_example_api_requests(finnhub_rest_client& finn, nlohmann::json& summary) {
 
 	const auto now_seconds{ std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count() };
@@ -104,7 +120,7 @@ void finnhub_example_api_requests(finnhub_rest_client& finn, nlohmann::json& sum
 		// stock exchange closing time is 1:00 utc . So let's begin the day at 2:00!
 		const auto start = today_at_0 + i * SECONDS_PER_DAY() + (2 * 60 * 60);
 		const auto stop = today_at_0 + (i + 1) * SECONDS_PER_DAY() + (2 * 60 * 60);
-		summary["NVDA-TEST"][std::to_string(start)] = finn.getStockCandles(playground::sheep::NVDA, start, stop, 1);
+		if constexpr (false) summary["NVDA-TEST"][std::to_string(start)] = finn.getStockCandles(playground::sheep::NVDA, start, stop, 1);
 
 		if (summary["NVDA-TEST"][std::to_string(start)]["s"].get<std::string>() == "ok") {
 			auto i_open = summary["NVDA-TEST"][std::to_string(start)]["o"].cbegin();
@@ -149,30 +165,42 @@ void finnhub_example_api_requests(finnhub_rest_client& finn, nlohmann::json& sum
 		const auto jter = std::next(iter);
 		++time_gaps[jter->time - iter->time];
 	}
-	for (auto pair : time_gaps) {
-		summary["gaps"][std::to_string(pair.first)] = pair.second;
-		standard_logger()->info(std::string("got") + std::to_string(pair.first) + ":" + std::to_string(pair.second));
+	for (const auto& pair : time_gaps) {
+		summary["gaps"][sized_to_string(pair.first, 7)] = pair.second;
+		standard_logger()->info(std::string("got  ") + std::to_string(pair.first) + "  \t:  " + std::to_string(pair.second));
 	}
 
+	std::vector<bordered_candle> candles_3_h;
 
+	uint64_t reference_time = 0;
+	for (const auto& element : candles) {
+		const uint64_t _3_hours{ 3 * 60 * 60 };
 
-
-
-	// check which currencies US stocks can have...
-	if constexpr (feature_toogle::sheep::FOLD_US_STOCK_CURRENCIES) {
-		summary[playground::sheep::stock_list_US_currencies] = fold_json_object_array_into_value_set(summary[playground::sheep::stock_list_US], "currency");
-	}
-
-	// check if the application still works fine when exceeding the api limit...
-	if constexpr (feature_toogle::sheep::TEST_API_LIMIT) {
-		using namespace std::chrono_literals;
-		for (int x = 0; x < 70; ++x) {
-
-			nlohmann::json test = finn.getQuote(playground::sheep::NVDA);
-			std::this_thread::sleep_for(200ms);
+		if (reference_time == 0 || (element.time - reference_time > _3_hours)) { // no ref time or at least 3 hours gone...
+			if (reference_time != 0) { // leave old bordered_candle
+				// nothing to do.
+			}
+			candles_3_h.emplace_back(); // insert new bordered_candle, init:
+			candles_3_h.back().first_time = element.time;
+			candles_3_h.back().last_time = element.time;
+			candles_3_h.back().c = element;
+			candles_3_h.back().c.time = 0;
+			candles_3_h.back().c.volume = 0;
+			
+			reference_time = (element.time / _3_hours) * _3_hours;
 		}
+		
+		// add element to current bordered_candle
+		candles_3_h.back().first_time = std::min(candles_3_h.back().first_time, element.time); // logically useless
+		candles_3_h.back().last_time = std::max(candles_3_h.back().last_time, element.time);
+		candles_3_h.back().c.high = std::max(candles_3_h.back().c.high, element.high);
+		candles_3_h.back().c.low = std::min(candles_3_h.back().c.low, element.low);
+		candles_3_h.back().c.close = element.close;
+		candles_3_h.back().c.volume += element.volume;
+
 	}
 
+	standard_logger()->info("done.");
 
 }
 
