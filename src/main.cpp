@@ -69,6 +69,17 @@ constexpr auto SECONDS_PER_DAY() -> decltype(
 	return std::chrono::duration_cast<std::chrono::seconds>(std::chrono::hours(24)).count();
 }
 
+class candle {
+public:
+	double open;
+	double close;
+	double high;
+	double low;
+	double volume;
+
+	uint64_t time;
+};
+
 void finnhub_example_api_requests(finnhub_rest_client& finn, nlohmann::json& summary) {
 
 	const auto now_seconds{ std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch()).count() };
@@ -87,61 +98,65 @@ void finnhub_example_api_requests(finnhub_rest_client& finn, nlohmann::json& sum
 			std::chrono::system_clock::now().time_since_epoch()).count() << '\n';
 	standard_logger()->info(ss.str());
 
+	std::vector<candle> candles;
+
 	for (int64_t i = -360; i != 0; ++i) {
 		// stock exchange closing time is 1:00 utc . So let's begin the day at 2:00!
 		const auto start = today_at_0 + i * SECONDS_PER_DAY() + (2 * 60 * 60);
 		const auto stop = today_at_0 + (i + 1) * SECONDS_PER_DAY() + (2 * 60 * 60);
 		summary["NVDA-TEST"][std::to_string(start)] = finn.getStockCandles(playground::sheep::NVDA, start, stop, 1);
+
+		if (summary["NVDA-TEST"][std::to_string(start)]["s"].get<std::string>() == "ok") {
+			auto i_open = summary["NVDA-TEST"][std::to_string(start)]["o"].cbegin();
+			auto i_close = summary["NVDA-TEST"][std::to_string(start)]["c"].cbegin();
+			auto i_high = summary["NVDA-TEST"][std::to_string(start)]["h"].cbegin();
+			auto i_low = summary["NVDA-TEST"][std::to_string(start)]["l"].cbegin();
+			auto i_time = summary["NVDA-TEST"][std::to_string(start)]["t"].cbegin();
+			auto i_volume = summary["NVDA-TEST"][std::to_string(start)]["v"].cbegin();
+
+			const auto end_open = summary["NVDA-TEST"][std::to_string(start)]["o"].cend();
+			const auto end_close = summary["NVDA-TEST"][std::to_string(start)]["c"].cend();
+			const auto end_high = summary["NVDA-TEST"][std::to_string(start)]["h"].cend();
+			const auto end_low = summary["NVDA-TEST"][std::to_string(start)]["l"].cend();
+			const auto end_time = summary["NVDA-TEST"][std::to_string(start)]["t"].cend();
+			const auto end_volume = summary["NVDA-TEST"][std::to_string(start)]["v"].cend();
+
+			for (; i_open != end_open && i_close != end_close && i_high != end_high && i_low != end_low && i_time != end_time && i_volume != end_volume;) {
+				candles.emplace_back();
+				candles.back().open = i_open->get<double>();
+				candles.back().close = i_close->get<double>();
+				candles.back().high = i_high->get<double>();
+				candles.back().low = i_low->get<double>();
+				candles.back().time = i_time->get<uint64_t>();
+				candles.back().volume = i_volume->get<double>();
+
+				++i_open;
+				++i_close;
+				++i_high;
+				++i_low;
+				++i_time;
+				++i_volume;
+			}
+		}
+
 	}
 
-	// get candles for...
-	if (true) {
-		summary[playground::sheep::NVDA_Candles] = finn.getStockCandles(playground::sheep::NVDA, 1656662061, 1664531661, 1);
-		//summary[playground::sheep::INTC_Candles] = finn.getStockCandles(playground::sheep::INTC, 1656662061, 1664531661, 1);
-		// TODO: list all possible resolutions!
-	}
+	std::sort(candles.begin(), candles.end(), [](const candle& a, const candle& b) { return a.time < b.time; });
 
-	// get current price, delta, open, previous close, day high, day low... of a single stock
-	if (false) {
-		summary[playground::sheep::NVDA_Quotes] = finn.getQuote(playground::sheep::NVDA);
-		//summary[playground::sheep::INTC_Quotes] = finn.getQuote(playground::sheep::INTC);
-		//summary[playground::sheep::BBBY_Quotes] = finn.getQuote(playground::sheep::BBBY);
+	std::map<int64_t, uint64_t> time_gaps; // time gap |-> count who often happened
+	
+	for (auto iter = candles.cbegin(); iter != candles.cend() && std::next(iter) != candles.cend(); ++iter) {
+		const auto jter = std::next(iter);
+		++time_gaps[jter->time - iter->time];
 	}
-
-	// get all US stock symbols...
-	if (false) {
-		auto stock_list = finn.getStockSymbol(playground::US);
-		summary[playground::sheep::stock_list_US] = stock_list;
-		try_sort_stock_list(summary[playground::sheep::stock_list_US]);
-	}
-
-	// get all DE stock symbols... needs expensive purchase plan...
-	if (false) {
-		auto stock_list = finn.getStockSymbol(playground::DE);
-		summary[playground::sheep::stock_list_DE] = stock_list;
-		try_sort_stock_list(summary[playground::sheep::stock_list_DE]);
+	for (auto pair : time_gaps) {
+		summary["gaps"][std::to_string(pair.first)] = pair.second;
+		standard_logger()->info(std::string("got") + std::to_string(pair.first) + ":" + std::to_string(pair.second));
 	}
 
 
-	// get company profile...
-	if (false) {
-		summary[playground::sheep::NVDA_Profile2] = finn.getCompanyProfile2(playground::sheep::NVDA);
-		//summary[playground::sheep::INTC_Profile2] = finn.getCompanyProfile2(playground::sheep::INTC);
-		//summary[playground::sheep::BBBY_Profile2] = finn.getCompanyProfile2(playground::sheep::BBBY);
 
 
-		summary[playground::sheep::NVDA_Basics] = finn.getBasicFinancials(playground::sheep::NVDA);
-	}
-
-	// search for a share using ISIN
-	if (false) {
-		summary[playground::sheep::AMD] = finn.getSymbolLookup(playground::sheep::AMD_ISIN);
-	}
-
-	// get general market news
-	if (false) {
-		summary[playground::sheep::News] = finn.getNews(finnhub_rest_client::market_news_category::values::general);
-	}
 
 	// check which currencies US stocks can have...
 	if constexpr (feature_toogle::sheep::FOLD_US_STOCK_CURRENCIES) {
