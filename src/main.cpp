@@ -103,8 +103,6 @@ void finnhub_example_api_requests(finnhub_rest_client& finn, nlohmann::json& sum
 	const auto today_at_0{
 		now_seconds / SECONDS_PER_DAY() * SECONDS_PER_DAY()
 	};
-	(void)today_at_0;
-	const auto p1 = std::chrono::system_clock::now();
 
 	standard_logger()->error(now_seconds % SECONDS_PER_DAY() / 60 / 60.0); // system clock indeed is utc clock.
 
